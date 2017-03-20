@@ -1,43 +1,43 @@
 import java.util.ArrayList;
 
 public class Board {
-	private ArrayList<House> all_houses = new ArrayList<House>();
-	public Boolean keep_playing = true;
-	private int init_houses;
-	private int init_seeds;
+	private ArrayList<House> allHouses = new ArrayList<House>();
+	public Boolean keepPlaying = true;
+	private int initHouses;
+	private int initSeeds;
 	
-	public Board(int num_houses, int num_seeds) {
-		this.init_houses = num_houses;
-		this.init_seeds = num_seeds;
+	public Board(int numHouses, int numSeeds) {
+		this.initHouses = numHouses;
+		this.initHeeds = numSeeds;
 		// create all houses and 2 more for the kalahs
-		for (int i=0; i<(num_houses*2)+2; i++){
-			this.all_houses.add(new House(num_seeds));
+		for (int i=0; i<(numHouses*2)+2; i++){
+			this.allHouses.add(new House(numSeeds));
 		}
 	}
 	
-	public void replay_or_quit(String option){
+	public void replayOrQuit(String option){
 		if (option == "Quit"){
-			keep_playing = false;
+			keepPlaying = false;
 		}
 		else if (option == "Replay"){
 			ArrayList<House> restart = new ArrayList<House>();
-			for (int i=0; i<(init_houses*2)+2; i++){
-				restart.add(new House(init_seeds));
+			for (int i=0; i<(initHouses*2)+2; i++){
+				restart.add(new House(initSeeds));
 			}
-			this.all_houses = restart;
+			this.allHouses = restart;
 		}
 		else{
 			System.out.println("Not a valid option. Please enter Quit or Replay.");
 		}
 	}
 	
-	public void display_outcome(){
-		if (all_houses.get(all_houses.size()/2-1).get_num_seeds() > 
-			all_houses.get(all_houses.size()-1).get_num_seeds()) {
+	public void displayOutcome(){
+		if (allHouses.get(allHouses.size()/2-1).getNumSeeds() > 
+			allHouses.get(allHouses.size()-1).getNumSeeds()) {
 			System.out.println("Player 1 is the winner.");
 		}
-		else if(all_houses.get(all_houses.size()/2-1).get_num_seeds() < 
-				all_houses.get(all_houses.size()-1).get_num_seeds()) {
+		else if(allHouses.get(allHouses.size()/2-1).getNumSeeds() < 
+				allHouses.get(allHouses.size()-1).getNumSeeds()) {
 			System.out.println("Player 2 is the winner.");
 		}
 		else {
@@ -45,15 +45,15 @@ public class Board {
 		}
 	}
 	
-	public int get_house_seed(int house_number){
-		return all_houses.get(house_number).get_num_seeds();
+	public int getHouseSeed(int houseNumber){
+		return allHouses.get(houseNumber).getNumSeeds();
 	}
 	
-	public void set_house_seed(int house_number, int num_seeds){
-		this.all_houses.get(house_number).set_num_seeds(num_seeds);
+	public void setHouseSeed(int houseNumber, int numSeeds){
+		this.allHouses.get(houseNumber).setNumSeeds(numSeeds);
 	}
 	
-	public ArrayList<House> get_all_houses() {
-		return all_houses;
+	public ArrayList<House> getAllHouses() {
+		return allHouses;
 	}
 }

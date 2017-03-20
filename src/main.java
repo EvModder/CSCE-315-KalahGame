@@ -1,22 +1,22 @@
 // to test methods
 public class main {
 	public static void main(String[] args) {
-		Board my_board = new Board(6,4); 
-		while (my_board.keep_playing){
-			my_board.set_house_seed(6, 40);
-			my_board.set_house_seed(13, 41);
-			my_board.display_outcome();
+		Board myBoard = new Board(6,4); 
+		while (myBoard.keepPlaying){
+			myBoard.setHouseSeed(6, 40);
+			myBoard.setHouseSeed(13, 41);
+			myBoard.displayOutcome();
 			for (int i=0; i<14; i++){
-				System.out.println(my_board.get_house_seed(i));
+				System.out.println(myBoard.getHouseSeed(i));
 			}
 			
-			my_board.replay_or_quit("Replay");
+			myBoard.replayOrQuit("Replay");
 			for (int i=0; i<14; i++){
-				System.out.println(my_board.get_house_seed(i));
+				System.out.println(myBoard.getHouseSeed(i));
 			}
-			my_board.display_outcome();
+			myBoard.displayOutcome();
 			
-			my_board.replay_or_quit("Quit");
+			myBoard.replayOrQuit("Quit");
 		}
 		System.out.println("done");
 	}
