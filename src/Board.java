@@ -8,7 +8,7 @@ public class Board {
 	
 	public Board(int numHouses, int numSeeds) {
 		this.initHouses = numHouses;
-		this.initHeeds = numSeeds;
+		this.initSeeds = numSeeds;
 		// create all houses and 2 more for the kalahs
 		for (int i=0; i<(numHouses*2)+2; i++){
 			this.allHouses.add(new House(numSeeds));
