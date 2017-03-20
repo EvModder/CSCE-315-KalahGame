@@ -1,4 +1,4 @@
-
+package ServerUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,36 +9,33 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class ServerMain extends Timer{
+	public static void main(String[] args){new ServerMain();}
+	
 	int port = 42374;
 	int MAX_CLIENTS = 3;
 	ServerSocket socket;
 	List<Client> clients;
-	Thread connectionWaitThread;
-	String outgoing = "";
+	Thread connectionWaitThread, ioThread;
+	StringBuilder outgoing;
 	
-	public class Client {
+	class Client {
+		Socket socket;
 		PrintWriter out;
 		BufferedReader in;
-		String name="null";
-		public Client(Socket connection){
+		Client(Socket connection){
+			socket = connection;
 			try {
 				out = new PrintWriter(connection.getOutputStream());
 				in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//				new Thread(){@Override public void run(){
-//					try{name = in.readLine();}
-//					catch(IOException e){e.printStackTrace();}
-//				}}.start();
 			}
 			catch(IOException e){e.printStackTrace();}
 		}
 	}
 	
-	public void start(){
+	public ServerMain(){
 		try{socket = new ServerSocket(port);}
 		catch(IOException e){e.printStackTrace();return;}
 		
@@ -47,8 +44,16 @@ public class ServerMain extends Timer{
 				try{
 					clients = new ArrayList<Client>();
 					
-					while(clients.size() < MAX_CLIENTS){
-						clients.add(new Client(socket.accept()));
+					while(true){
+						Socket connection = socket.accept();
+						if(clients.size() == MAX_CLIENTS){
+							PrintWriter temp = new PrintWriter(connection.getOutputStream());
+							temp.println("Server is full!");
+							temp.flush();
+							connection.close();
+							continue;
+						}
+						clients.add(new Client(connection));
 						System.out.println("Got a connection to a client");
 					}
 				}
@@ -57,52 +62,52 @@ public class ServerMain extends Timer{
 		};
 		connectionWaitThread.start();
 		
-		new Thread(){
-			@Override public void run(){
-				Scanner s = new Scanner(System.in);
-				String line;
-				while(!(line = s.nextLine()).equals("close")) outgoing += (line + '\n');
-				s.close();
-			}
-		}.start();
-		
-		schedule(new TimerTask(){
+		ioThread = new Thread(){
 			@Override public void run() {
-				Iterator<Client> it = clients.iterator();
-				while(it.hasNext()){
-					Client client = it.next();
-					try{
-						if(client.in.ready()){
-							String incoming = client.in.readLine();
-							if(incoming.equals("close")){
+				while(!socket.isClosed()){
+					Iterator<Client> it = clients.iterator();
+					while(it.hasNext()){
+						Client client = it.next();
+						try{
+							if(client.socket.isClosed()){
 								it.remove();
 								System.out.println("A client left the server");
-								client = null;
 							}
 							else{
-								System.out.println("Recieved from client: "+incoming);
+								if(client.in.ready()){
+									String incoming = client.in.readLine();
+									System.out.println("Received from client: "+incoming);
+									//TODO: send received message to game board to process
+								}
+								if(outgoing != null){
+									client.out.print(outgoing.toString());
+									client.out.flush();
+								}
 							}
 						}
-						if(client != null && !outgoing.isEmpty()){
-							client.out.print(outgoing);
-							client.out.flush();
-						}
+						catch(IOException e){e.printStackTrace();}
 					}
-					catch(IOException e){e.printStackTrace();}
+					outgoing = null;
 				}
-				outgoing = "";
 			}
-		}, 0, 10);
+		};
+		ioThread.start();
+		
 		System.out.println("Server opened");
 	}
 	
 	@SuppressWarnings("deprecation")
 	public void close(){
-		if(socket != null) try{socket.close();} catch(IOException e){}
 		connectionWaitThread.stop();
+		if(socket != null) try{socket.close();} catch(IOException e){}
 	}
 	
-	public static void main(String[] args){
-		new ServerMain().start();
+	public int numClients(){
+		return clients.size();
+	}
+	
+	public void println(String message){
+		if(outgoing == null) outgoing = new StringBuilder(message).append('\n');
+		else outgoing.append(message).append('\n');
 	}
 }
