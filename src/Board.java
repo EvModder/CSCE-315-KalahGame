@@ -43,7 +43,8 @@ public class Board {
 							+ "2. The seeds will move in a counter-clockwise direction and be placed in the next house or the player's kalah respectively. \n"
 							+ "3. To move, player 1 selects a non-empty house from 0-5, and player 2 selects a non-empty house from 7-12. \n"
 							+ "4. If the last seed lands on your Kalah, you get to go again. \n"
-							+ "5. If the last seed lands on an empty house on your side, you get all the seeds from tyour opponent's house that is directly opposite from yours. \n");
+							+ "5. If the last seed lands on an empty house on your side, you get all the seeds from tyour opponent's house that is directly opposite from yours. \n"
+							+ "*** To Reset a game type in 'R' and to get the instrutions, type in 'I' *** \n");
 	}
 	
 	public boolean validMove(int index){
