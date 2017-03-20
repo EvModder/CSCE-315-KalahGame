@@ -37,7 +37,13 @@ public class Board {
 	}
 
 	public void instructions(){
-		System.out.println("");
+		System.out.println("The objective of the game is to have the most seeds in your 'Kalah' by the end of the game. "
+							+ "You and your oppenent take turns to move the seeds according to the following rules. \n"
+							+ "1. You can only move the seeds on your side of the Kalah board. \n"
+							+ "2. The seeds will move in a counter-clockwise direction and be placed in the next house or the player's kalah respectively. \n"
+							+ "3. To move, player 1 selects a non-empty house from 0-5, and player 2 selects a non-empty house from 7-12. \n"
+							+ "4. If the last seed lands on your Kalah, you get to go again. \n"
+							+ "5. If the last seed lands on an empty house on your side, you get all the seeds from tyour opponent's house that is directly opposite from yours. \n");
 	}
 	
 	public boolean validMove(int index){
