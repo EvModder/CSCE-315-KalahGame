@@ -26,7 +26,10 @@ public class Board {
 		positions = new int[numHousesAndKalahs];
 		
 		for (int i=0; i<numHousesAndKalahs; i++){
-			if (i != kalahPlayer1 || i != kalahPlayer2){
+			if (i == kalahPlayer1 || i == kalahPlayer2){
+				positions[i] = 0;
+			}
+			else{
 				positions[i] = numSeeds;
 			}
 		}
