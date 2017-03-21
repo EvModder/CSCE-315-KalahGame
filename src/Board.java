@@ -1,18 +1,19 @@
-import java.util.ArrayList;
-
-public class Board {
-	int[] positions;
-	boolean keepPlaying = true;
-	
+public class Board{
+	/* 
+		Class members
+	*/
+	private int[] positions;
 	private int initHouses;
 	private int initSeeds;
 	private int kalahPlayer1;
 	private int kalahPlayer2;
 	private int numHousesAndKalahs;
-	
 	private boolean player1Turn;
 	
-	public Board(int numHouses, int numSeeds) {
+	/* 
+		Constructor
+	*/
+	public Board(int numHouses, int numSeeds){
 		this.initHouses = numHouses;
 		this.initSeeds = numSeeds;
 		
@@ -46,10 +47,13 @@ public class Board {
 							+ "2. The seeds will move in a counter-clockwise direction and be placed in the next house or the player's kalah respectively. \n"
 							+ "3. To move, player 1 selects a non-empty house from 0-5, and player 2 selects a non-empty house from 7-12. \n"
 							+ "4. If the last seed lands on your Kalah, you get to go again. \n"
-							+ "5. If the last seed lands on an empty house on your side, you get all the seeds from tyour opponent's house that is directly opposite from yours. \n"
-							+ "*** To Reset a game type in 'R' and to get the instrutions, type in 'I' *** \n");
+							+ "5. If the last seed lands on an empty house on your side, you get all the seeds from your opponent's house that is directly opposite from yours. \n"
+							+ "*** To Reset a game type in 'R' and to get the instructions, type in 'I' *** \n");
 	}
 	
+	/*
+		A valid move is index 0-5 for player 1, 7-12 for player 2.
+	*/
 	public boolean validMove(int index){
 		if (player1Turn){
 			if ((index >= 0) && (index < kalahPlayer1)){
@@ -68,6 +72,11 @@ public class Board {
 		return false;
 	}
 	
+	/*
+		First get the number of seeds to distribute, then go around the board
+		and increment all houses and the kalah the player owns. We use the modulus 
+		operator to wrap around after we hit the max amount of houses and kalahs.
+	*/
 	public int distributeSeeds(int index){
 		int toDistribute = positions[index];
 		positions[index] = 0;
@@ -86,6 +95,9 @@ public class Board {
 		return index;
 	}
 	
+	/*
+		Checks to see if the last seed lands in the current player's kalah.
+	*/
 	public boolean hitKalah(int index){
 		if (player1Turn && index == kalahPlayer1){
 			return true;
@@ -96,6 +108,10 @@ public class Board {
 		return false;
 	}
 	
+	/*
+		Checks to see if the current player lands the last seed into an empty house 
+		they own. 
+	*/
 	public boolean hitEmptyHouse(int index){
 		if (player1Turn && index >= 0 && index < kalahPlayer1 && positions[index] == 1){
 			return true;
@@ -106,6 +122,11 @@ public class Board {
 		return false;
 	}
 	
+	/*
+		This function is called whenever hitEmptyHouse returns true. It will get the
+		amount of seeds of the opposite house to the empty house and add it to the
+		correct player's kalah.
+	*/
 	public void captureOppositeSeeds(int index){
 		int oppositeIndex = (numHousesAndKalahs - 2) - index;
 		
@@ -123,6 +144,9 @@ public class Board {
 		}
 	}
 	
+	/*
+		The game is over when either of the players' rows are empty.
+	*/
 	public boolean checkGameOver(){
 		boolean housesEmptyPlayer1 = true;
 		boolean housesEmptyPlayer2 = true;
@@ -150,22 +174,24 @@ public class Board {
 		return (housesEmptyPlayer1 || housesEmptyPlayer2);
 	}
 	
+	/*
+		This function is called when the game is finished to correctly 
+		distribute seeds that are still on the board when one player's side
+		has completely no seeds. 
+	*/
 	public void collectLeftoverSeeds(){
-		if (player1Turn){
-			int firstHouse = kalahPlayer1 + 1;
-			int lastHouse = kalahPlayer2;
-			for (int i = firstHouse; i<lastHouse; i++){
-				positions[kalahPlayer2] += positions[i];
-				positions[i] = 0;
-			}
+		int firstHouse = 0;
+		int lastHouse = kalahPlayer1;
+		for (int i = firstHouse; i<lastHouse; i++){
+			positions[kalahPlayer1] += positions[i];
+			positions[i] = 0;
 		}
-		else{
-			int firstHouse = 0;
-			int lastHouse = kalahPlayer1;
-			for (int i = firstHouse; i<lastHouse; i++){
-				positions[kalahPlayer1] += positions[i];
-				positions[i] = 0;
-			}
+		
+		int firstHouse2 = kalahPlayer1 + 1;
+		int lastHouse2 = kalahPlayer2;
+		for (int i = firstHouse2; i<lastHouse2; i++){
+			positions[kalahPlayer2] += positions[i];
+			positions[i] = 0;
 		}
 	}
 	
@@ -178,38 +204,24 @@ public class Board {
 		}
 	}
 	
+	/*
+		Resets the game board to the original state.
+	*/
 	public void reset(){
 		for (int i=0; i<numHousesAndKalahs; i++){
-			if (i != kalahPlayer1 || i != kalahPlayer2){
-				positions[i] = initSeeds;
+			if (i == kalahPlayer1 || i == kalahPlayer2){
+				positions[i] = 0;
 			}
 			else{
-				positions[i] = 0;
+				positions[i] = initSeeds;
 			}
 		}
 		player1Turn = true;
 	}
 	
-	public void replayOrQuit(String option){
-		if (option == "Quit"){
-			keepPlaying = false;
-		}
-		else if (option == "Replay"){
-			for (int i=0; i<numHousesAndKalahs; i++){
-				if (i != kalahPlayer1 || i != kalahPlayer2){
-					positions[i] = initSeeds;
-				}
-				else{
-					positions[i] = 0;
-				}
-			}
-			player1Turn = true;
-		}
-		else{
-			System.out.println("Not a valid option. Please enter Quit or Replay.");
-		}
-	}
-	
+	/*
+		Compares the value of seeds in the two player's kalahs.
+	*/
 	public void displayOutcome(){
 		if (positions[kalahPlayer1] > positions[kalahPlayer2]){
 			System.out.println("Player 1 is the winner.");
@@ -236,10 +248,6 @@ public class Board {
 	
 	public boolean getPlayerTurn(){
 		return player1Turn;
-	}
-	
-	public int[] getAllPositions(){
-		return positions;
 	}
 	
 	public String toString(){
