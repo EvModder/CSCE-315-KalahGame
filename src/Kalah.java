@@ -106,6 +106,7 @@ public class Kalah{
 				userInput = sc.nextLine();
 				if (userInput.equals("Quit") || userInput.equals("Replay")){
 					improper_input = false;
+					break;
 				}
 				System.out.println("Improper input.");
 			}
