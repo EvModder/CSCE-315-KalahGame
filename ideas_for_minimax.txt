@@ -1,0 +1,95 @@
+// Psuedocode and ideas about implementing the minimax tree
+
+All possible moves: can only perform moves on houses that do not have 0 seeds.
+Go through every child and only create nodes for houses that are not empty.
+
+
+
+Create a utility function
+	Evaluates the state of the board.
+	One side max, one side min.
+	
+Utility values to leaves
+	Need 2 different values for states - final state and not final state.
+	
+	Final State: dependent on who would win
+	
+	Not Final:  ALSO - dependent on the number of seeds you would acquire in your kalah
+				if their ranks are the same. 
+				
+				0 - Land in opponent kalah
+				1 - Last seed land in a non empty house on own side.
+				2 - Last seed would land in kalah on own side.
+				3 - Last seed would land in empty house on own side. (Assigned more
+					value as the number of seeds on the opposite house increases.)
+
+
+					
+Minimax Tree
+	New level for each move.
+	Alternate between the max and min players.
+	
+Help from:
+https://www.cs.cornell.edu/courses/cs312/2002sp/lectures/rec21.htm
+
+Without pruning:
+
+minimax (node n){
+	if n is a leaf node return utility/evaluation function on node
+	
+	else if n is a max node
+		call minimax on all children and compare the values of the utility function
+		return the max of all the children
+	
+	else if n is a min node
+		call minimax on all children and compare the values of the utility function
+		return the min of all the children
+}
+
+To a certain depth:
+
+minimax_depth (node n, int depth){
+	if n is a leaf node or depth = 0
+		return utility/evaluation function on node
+	
+	else if n is a max node
+		call minimax(children, depth - 1) on all children and compare the values of the utility function
+		return the max of all the children
+	
+	else if n is a min node
+		call minimax(children, depth - 1) on all children and compare the values of the utility function
+		return the min of all the children
+}
+
+With pruning:
+
+minimax(node n, int depth, int min, int max){
+	if n is a leaf node or depth = 0
+		return utility/evaluation function on node
+	
+	else if n is a max node
+		a = min
+		for each child of n
+			b = minimax(child, depth - 1, a, max)
+			if a > b, a = b;
+			if a > max, return max;
+		return a
+	
+	else if n is a min node 
+		a = max
+		for each child of n
+			b = minimax(child, depth - 1, min, a);
+			if a < b, a = b;
+			if a < min, return min;
+		return a
+}
+
+
+
+
+Tree structure
+public class Node<T> implements Iterable<Node<T>> {
+	T data;
+	Node<T> parent;
+	List<Node<T>> children;
+}
