@@ -1,3 +1,4 @@
+
 import java.util.*;
 
 public class Kalah{
@@ -13,7 +14,7 @@ public class Kalah{
 	}
 	
 	public void play(){
-		Scanner sc = new Scanner(System.in);
+		Scanner scan = new Scanner(System.in);
 		String userInput = "";
 		int userIndex;
 		boolean keepPlaying = true;
@@ -31,13 +32,15 @@ public class Kalah{
 					System.out.println("\n" + gameBoard + "\n");
 					if (gameBoard.getPlayerTurn()){
 						System.out.println("Player 1's Turn: ");
-						userInput = sc.nextLine();
+						userInput = Utils.getTimeLimitedInput(10*1000);//10s limit
 						userIndex = Integer.parseInt(userInput);
+						//TODO: make move
 					}
 					else{
 						System.out.println("Player 2's Turn: ");
-						userInput = sc.nextLine();
+						userInput = Utils.getTimeLimitedInput(10*1000);//10s limit
 						userIndex = Integer.parseInt(userInput);
+						//TODO: make move
 					}
 				}
 				catch(NumberFormatException error){
@@ -60,7 +63,7 @@ public class Kalah{
 					they can only select houses they own.
 				*/
 				if (!gameBoard.validMove(userIndex)){
-					System.err.println("Not a valid move.");
+					System.err.println("Not a valid move: "+userIndex);
 					continue;
 				}
 				
@@ -103,10 +106,9 @@ public class Kalah{
 			boolean improper_input = true;
 			while (improper_input){
 				System.out.println("Enter Replay or Quit");
-				userInput = sc.nextLine();
+				userInput = scan.nextLine();
 				if (userInput.equals("Quit") || userInput.equals("Replay")){
 					improper_input = false;
-					break;
 				}
 				System.out.println("Improper input.");
 			}
@@ -117,5 +119,6 @@ public class Kalah{
 				gameBoard.reset();
 			}
 		}
+		scan.close();
 	}
 }
