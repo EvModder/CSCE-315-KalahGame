@@ -1,7 +1,7 @@
 public class Board{
-	/* 
-		Class members
-	*/
+	/*
+	 * Class members
+	 */
 	private int[] positions;
 	private int initHouses;
 	private int initSeeds;
@@ -10,9 +10,14 @@ public class Board{
 	private int numHousesAndKalahs;
 	private boolean player1Turn;
 	
-	/* 
-		Constructor
-	*/
+	private boolean hasUsedPieRule = false;
+	private int numSwitches = 0;
+	private int[] initRandomSeeds;
+	private boolean random = false;
+	
+	/*
+	 * Constructor with number of houses and seeds provided
+	 */
 	public Board(int numHouses, int numSeeds){
 		this.initHouses = numHouses;
 		this.initSeeds = numSeeds;
@@ -35,6 +40,33 @@ public class Board{
 			}
 		}
 	}
+	
+	/*
+	 * Constructor with an array of random seeds.
+	 */
+	public Board(int[] randomSeeds){
+		this.initHouses = randomSeeds.length;
+		this.initRandomSeeds = randomSeeds;
+		
+		kalahPlayer1 = initHouses;
+		kalahPlayer2 = (initHouses*2)+1;
+		
+		numHousesAndKalahs = (initHouses*2)+2;
+		
+		player1Turn = true;
+		
+		positions = new int[numHousesAndKalahs];
+		
+		for (int i=0; i<initHouses; i++){
+			positions[i] = randomSeeds[i];
+			positions[i + initHouses + 1] = randomSeeds[i];
+		}
+		
+		positions[kalahPlayer1] = 0;
+		positions[kalahPlayer2] = 0;
+		
+		random = true;
+	}
 
 	public void displayTitle(){
 		System.out.println("Welcome to Kalah!");
@@ -52,8 +84,8 @@ public class Board{
 	}
 	
 	/*
-		A valid move is index 0-5 for player 1, 7-12 for player 2.
-	*/
+	 * A valid move is index 0-5 for player 1, 7-12 for player 2 (with 6,4 config)
+	 */
 	public boolean validMove(int index){
 		if (player1Turn){
 			if ((index >= 0) && (index < kalahPlayer1)){
@@ -73,10 +105,10 @@ public class Board{
 	}
 	
 	/*
-		First get the number of seeds to distribute, then go around the board
-		and increment all houses and the kalah the player owns. We use the modulus 
-		operator to wrap around after we hit the max amount of houses and kalahs.
-	*/
+	 * First get the number of seeds to distribute, then go around the board
+	 * and increment all houses and the kalah the player owns. We use the modulus 
+	 * operator to wrap around after we hit the max amount of houses and kalahs.
+	 */
 	public int distributeSeeds(int index){
 		int toDistribute = positions[index];
 		positions[index] = 0;
@@ -96,8 +128,8 @@ public class Board{
 	}
 	
 	/*
-		Checks to see if the last seed lands in the current player's kalah.
-	*/
+	 * Checks to see if the last seed lands in the current player's kalah.
+	 */
 	public boolean hitKalah(int index){
 		if (player1Turn && index == kalahPlayer1){
 			return true;
@@ -109,9 +141,8 @@ public class Board{
 	}
 	
 	/*
-		Checks to see if the current player lands the last seed into an empty house 
-		they own. 
-	*/
+	 * Checks to see if the current player lands the last seed into an empty house they own.
+	 */
 	public boolean hitEmptyHouse(int index){
 		if (player1Turn && index >= 0 && index < kalahPlayer1 && positions[index] == 1){
 			return true;
@@ -123,10 +154,9 @@ public class Board{
 	}
 	
 	/*
-		This function is called whenever hitEmptyHouse returns true. It will get the
-		amount of seeds of the opposite house to the empty house and add it to the
-		correct player's kalah.
-	*/
+	 * This function is called whenever hitEmptyHouse returns true. It will get the amount of seeds 
+	 * of the opposite house to the empty house and add it to the correct player's kalah.
+	 */
 	public void captureOppositeSeeds(int index){
 		int oppositeIndex = (numHousesAndKalahs - 2) - index;
 		
@@ -145,8 +175,8 @@ public class Board{
 	}
 	
 	/*
-		The game is over when either of the players' rows are empty.
-	*/
+	 * The game is over when either of the players' rows are empty.
+	 */
 	public boolean checkGameOver(){
 		boolean housesEmptyPlayer1 = true;
 		boolean housesEmptyPlayer2 = true;
@@ -175,10 +205,9 @@ public class Board{
 	}
 	
 	/*
-		This function is called when the game is finished to correctly 
-		distribute seeds that are still on the board when one player's side
-		has completely no seeds. 
-	*/
+	 * This function is called when the game is finished to correctly distribute seeds 
+	 * that are still on the board when one player's side has completely no seeds.
+	 */
 	public void collectLeftoverSeeds(){
 		int firstHouse = 0;
 		int lastHouse = kalahPlayer1;
@@ -202,26 +231,69 @@ public class Board{
 		else{
 			player1Turn = true;
 		}
+		numSwitches++;
 	}
 	
 	/*
-		Resets the game board to the original state.
-	*/
+	 * Resets the game board to the original state.
+	 */
 	public void reset(){
-		for (int i=0; i<numHousesAndKalahs; i++){
-			if (i == kalahPlayer1 || i == kalahPlayer2){
-				positions[i] = 0;
+		if (random){
+			for (int i=0; i<initHouses; i++){
+				positions[i] = initRandomSeeds[i];
+				positions[i + initHouses + 1] = initRandomSeeds[i];
 			}
-			else{
-				positions[i] = initSeeds;
-			}
+			positions[kalahPlayer1] = 0;
+			positions[kalahPlayer2] = 0;
+			player1Turn = true;
+			numSwitches = 0;
+			hasUsedPieRule = false;
 		}
-		player1Turn = true;
+		else{
+			for (int i=0; i<numHousesAndKalahs; i++){
+				if (i == kalahPlayer1 || i == kalahPlayer2){
+					positions[i] = 0;
+				}
+				else{
+					positions[i] = initSeeds;
+				}
+			}
+			player1Turn = true;
+			numSwitches = 0;
+			hasUsedPieRule = false;
+		}
+	}
+	
+	public void pieRule(){
+		if (numSwitches != 1){
+			System.out.println("Cannot use pie rule here. Player one's first turn has either not begun or is passed.");
+		}
+		else{
+			int[] tempArr = new int[initHouses];
+			for (int i=0; i<initHouses; i++){
+				tempArr[i] = positions[i];
+			}
+			
+			for (int i=0; i<initHouses; i++){
+				positions[i] = positions[i + initHouses + 1];
+			}
+			
+			int index = 0;
+			for (int i=kalahPlayer1+1; i<kalahPlayer2; i++){
+				positions[i] = tempArr[index];
+				index++;
+			}
+			int tempKalahP1 = positions[kalahPlayer1];
+			positions[kalahPlayer1] = positions[kalahPlayer2];
+			positions[kalahPlayer2] = tempKalahP1;
+			player1Turn = true;
+		}
+		hasUsedPieRule = true;
 	}
 	
 	/*
-		Compares the value of seeds in the two player's kalahs.
-	*/
+	 * Compares the value of seeds in the two player's kalahs.
+	 */
 	public void displayOutcome(){
 		if (positions[kalahPlayer1] > positions[kalahPlayer2]){
 			System.out.println("Player 1 is the winner.");
@@ -248,6 +320,18 @@ public class Board{
 	
 	public boolean getPlayerTurn(){
 		return player1Turn;
+	}
+	
+	public int getNumSwitches(){
+		return numSwitches;
+	}
+	
+	public boolean getHasUsedPieRule(){
+		return hasUsedPieRule;
+	}
+	
+	public void setHasUsedPieRule(boolean newCondition){
+		hasUsedPieRule = newCondition;
 	}
 	
 	public String toString(){

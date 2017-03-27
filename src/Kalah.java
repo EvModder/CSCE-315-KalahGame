@@ -22,14 +22,28 @@ public class Kalah{
 		while (keepPlaying){
 			while (!gameBoard.checkGameOver()){
 				/*
-					Get user input and convert it to an integer. If this throws
-					an NumberFormatException, then the user has inputted a string
-					and so we check if it is the option flags for reset and instructions.
-					Else print an error message and go to the next iteration of the 
-					while loop.
-				*/
+				 * Get user input and convert it to an integer. If this throws an NumberFormatException, 
+				 * then the user has inputted a string and so we check if it is the option flags for 
+				 * reset and instructions. Else print an error message and go to the next iteration of 
+				 * the while loop.
+				 */
 				try{
 					System.out.println("\n" + gameBoard + "\n");
+					if (gameBoard.getNumSwitches() == 1 && !gameBoard.getHasUsedPieRule())
+					{
+						System.out.println("Would player 2 like to use a pie rule? Y or N");
+						userInput = Utils.getTimeLimitedInput(10*1000);
+						if (userInput.equals("Y")){
+							gameBoard.pieRule();
+							continue;
+						}
+						else if (userInput.equals("N")){
+							gameBoard.setHasUsedPieRule(true);
+						}
+						else if (!userInput.equals("Y") || !userInput.equals("N")){
+							continue;
+						}
+					}
 					if (gameBoard.getPlayerTurn()){
 						System.out.println("Player 1's Turn: ");
 						userInput = Utils.getTimeLimitedInput(10*1000);//10s limit
@@ -58,21 +72,20 @@ public class Kalah{
 					}
 				}
 				
-				/* 
-					Check to see if the index the user inputted is a valid move such that
-					they can only select houses they own.
-				*/
+				/*
+				 * Check to see if the index the user inputted is a valid move such that 
+				 * they can only select houses they own.
+				 */
 				if (!gameBoard.validMove(userIndex)){
 					System.err.println("Not a valid move: "+userIndex);
 					continue;
 				}
 				
 				/*
-					Distribute seeds according to the house the user selected. If it hits their
-					own kalah, then we continue to the next iteration of the while loop. This 
-					emulates the user getting another turn, as we don't switch the turn to the next
-					user in this case.
-				*/
+				 * Distribute seeds according to the house the user selected. If it hits their own 
+				 * kalah, then we continue to the next iteration of the while loop. This emulates 
+				 * the user getting another turn, as we don't switch the turn to the next user in this case.
+				 */
 				int index = gameBoard.distributeSeeds(userIndex);
 				if (gameBoard.hitKalah(index)){
 					continue;
@@ -89,10 +102,9 @@ public class Kalah{
 				}
 			}
 			/*
-				When the game ends, clean up the board such that there are no more remaining seeds.
-				Then display the final board state, the outcome of the game, and the respective
-				scores.
-			*/
+			 * When the game ends, clean up the board such that there are no more remaining seeds. 
+			 * Then display the final board state, the outcome of the game, and the respective scores.
+			 */
 			gameBoard.collectLeftoverSeeds();
 			System.out.println(gameBoard);
 			gameBoard.displayOutcome();
@@ -100,8 +112,8 @@ public class Kalah{
 			System.out.println("Player 2: " + gameBoard.getNumSeeds(gameBoard.getIndexPlayer2()));
 			
 			/*
-				Prompt the user if they would like to quit the game or replay.
-			*/
+			 * Prompt the user if they would like to quit the game or replay.
+			 */
 			
 			boolean improper_input = true;
 			while (improper_input){
@@ -110,7 +122,9 @@ public class Kalah{
 				if (userInput.equals("Quit") || userInput.equals("Replay")){
 					improper_input = false;
 				}
-				System.out.println("Improper input.");
+				else{
+					System.out.println("Improper input.");
+				}
 			}
 			if (userInput.equals("Quit")){
 				keepPlaying = false;
