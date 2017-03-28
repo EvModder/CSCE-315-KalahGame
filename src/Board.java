@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class Board{
 	/*
 	 * Class members
@@ -39,6 +41,15 @@ public class Board{
 				positions[i] = numSeeds;
 			}
 		}
+	}
+	
+	/*
+ 	 *Copy Constructor
+	 */
+	public Board(Board b){
+		this(b.getIndexPlayer1(), b.getInitSeeds());
+		int [] copyGame = Arrays.copyOf(b.getPositions(), b.getPositions().length);
+		this.positions = copyGame;
 	}
 	
 	/*
@@ -306,8 +317,16 @@ public class Board{
 		}
 	}
 	
+	public int getInitSeeds(){
+		return initSeeds;
+	}
+	
 	public int getNumSeeds(int index){
 		return positions[index];
+	}
+	
+	public int[] getPositions(){
+		return positions;
 	}
 	
 	public int getIndexPlayer1(){

@@ -27,6 +27,7 @@ public class Kalah{
 				 * reset and instructions. Else print an error message and go to the next iteration of 
 				 * the while loop.
 				 */
+				AI ai = new AI();
 				try{
 					System.out.println("\n" + gameBoard + "\n");
 					if (gameBoard.getNumSwitches() == 1 && !gameBoard.getHasUsedPieRule())
@@ -53,7 +54,8 @@ public class Kalah{
 					else{
 						System.out.println("Player 2's Turn: ");
 						userInput = Utils.getTimeLimitedInput(10*1000);//10s limit
-						userIndex = Integer.parseInt(userInput);
+						//userIndex = Integer.parseInt(userInput);
+						userIndex = (int)ai.getMove(gameBoard);
 						//TODO: make move
 					}
 				}
