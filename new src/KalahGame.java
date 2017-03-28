@@ -1,17 +1,20 @@
+
+
 import java.util.Map;
 import javax.swing.JOptionPane;
+import AIs.*;
 import ServerUtils.*;
 import ServerUtils.Connection.MessageReceiver;
 
 class KalahGame implements MessageReceiver{
 	private BoardFrame board;
-	public static int move, timeLimit;
+	public static int move;
 	public static boolean waitingForMove=true;
 	
 	Connection connection;
 	boolean waitingForInfo=true, waitingForReady=true, waitingForOK=true, waitingForYourMove=true;
-	boolean isServer, myTurn, gameOver;
-	int pieRuleChooser;
+	boolean isServer, myTurn, gameOver, playAsAI;
+	int pieRuleChooser, timeLimit;
 	
 	public KalahGame(boolean isServer){
 		this.isServer = isServer;
@@ -30,10 +33,12 @@ class KalahGame implements MessageReceiver{
 				Utils.closeWaitingWindow();
 				return;
 			}
+			//load settings
+			Map<String,String> settings = Utils.getSettings();
+			playAsAI = Boolean.parseBoolean(settings.get("play-as-AI"));
+			AI ai = new DumbAI();
+			
 			if(isServer){
-				//load settings
-				Map<String,String> settings = Utils.getSettings();
-				
 				int houses = Integer.parseInt(settings.get("holes-per-side"));
 				int seeds = Integer.parseInt(settings.get("seeds-per-hole"));
 				int timeLimit = Integer.parseInt(settings.get("time-limit"));
@@ -79,8 +84,11 @@ class KalahGame implements MessageReceiver{
 					
 					if(pieRuleChooser == 1){
 						pieRuleChooser = 0;
-						if(JOptionPane.showConfirmDialog(null, "Do you want to take the pie rule?",
-								"Pie Rule Decision", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+						if((!playAsAI && JOptionPane.showConfirmDialog(null,
+								"Do you want to take the pie rule?",
+								"Pie Rule Decision",
+								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+							|| (playAsAI && ai.doPieRule(board.getSquaresAsInts(), timeLimit))){
 							
 							connection.println("P");
 							board.pieRule();
@@ -92,20 +100,28 @@ class KalahGame implements MessageReceiver{
 						}
 					}
 					
-					board.enableButtons();
 					StringBuilder message = new StringBuilder("");
-					//wait for this player to move, make moves as long as they hit their Kalah
-					while(waitingForMove && !gameOver){
-						while(waitingForMove && !gameOver) yield();
-						message.append(move+1);
-						if(board.moveSeeds(move) == board.numHouses && board.gameNotOver()){
-							message.append(' ');
-							waitingForMove = true;
+					if(playAsAI){//get ai move
+						for(int move : ai.getMove(board.getSquaresAsInts(), timeLimit)){
+							message.append(move+1);
+							if(board.moveSeeds(move) == board.numHouses) message.append(' ');
 						}
 					}
-					waitingForMove = true;
-					board.disableButtons();
-					
+					else{//get player move
+						board.enableButtons();
+						//wait for this player to move, make moves as long as they hit their Kalah
+						while(waitingForMove && !gameOver){
+							while(waitingForMove && !gameOver) yield();
+							message.append(move+1);
+							if(board.moveSeeds(move) == board.numHouses && board.gameNotOver()){
+								message.append(' ');
+								waitingForMove = true;
+							}
+						}
+						waitingForMove = true;
+						board.disableButtons();
+					}
+					//send move
 					connection.println(message.toString());
 					
 					while(waitingForOK && !gameOver) yield();//wait for opponent to confirm move
@@ -131,17 +147,18 @@ class KalahGame implements MessageReceiver{
 				if(score > 0){
 					connection.println("LOSER");
 					connection.close();
-					JOptionPane.showMessageDialog(null, "You win!");
+					JOptionPane.showMessageDialog(null,"You win!","Game Over",JOptionPane.DEFAULT_OPTION);
 				}
 				else if(score == 0){
 					connection.println("TIE");
 					connection.close();
-					JOptionPane.showMessageDialog(null, "The game was a tie.");
+					JOptionPane.showMessageDialog(null, "The game was a tie.", "Game Over",
+							JOptionPane.DEFAULT_OPTION);
 				}
 				else{
 					connection.println("WINNER");
 					connection.close();
-					JOptionPane.showMessageDialog(null, "You lose!");
+					JOptionPane.showMessageDialog(null,"You lose!","Game Over",JOptionPane.DEFAULT_OPTION);
 				}
 			}
 			else{
@@ -179,15 +196,15 @@ class KalahGame implements MessageReceiver{
 			waitingForInfo = false;
 		}
 		else if(args[0].equals("LOSER")){
-			JOptionPane.showMessageDialog(null, "You lose!");
+			JOptionPane.showMessageDialog(null,"You lose!","Game Over",JOptionPane.DEFAULT_OPTION);
 			gameOver = true;
 		}
 		else if(args[0].equals("WINNER")){
-			JOptionPane.showMessageDialog(null, "You win!");
+			JOptionPane.showMessageDialog(null,"You win!","Game Over",JOptionPane.DEFAULT_OPTION);
 			gameOver = true;
 		}
 		else if(args[0].equals("TIE")){
-			JOptionPane.showMessageDialog(null, "The game was a tie.");
+			JOptionPane.showMessageDialog(null,"The game was a tie.","Game Over",JOptionPane.DEFAULT_OPTION);
 			gameOver = true;
 		}
 		else if(args[0].equals("TIME")){

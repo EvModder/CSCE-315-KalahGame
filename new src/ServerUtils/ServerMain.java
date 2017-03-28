@@ -77,7 +77,7 @@ public class ServerMain extends Connection{
 	}
 	
 	@Override
-	public synchronized void println(String message){
+	public void println(String message){
 //		if(outgoing == null) outgoing = new StringBuilder(message).append('\n');
 //		else outgoing.append(message).append('\n');
 		client.out.println(message);

@@ -1,3 +1,4 @@
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -150,6 +151,14 @@ class BoardFrame extends JFrame{
 			housesAndKalahs[i].setSeeds(housesAndKalahs[i+numHouses+1].getSeeds());
 			housesAndKalahs[i+numHouses+1].setSeeds(temp);
 		}
+	}
+	
+	int[] getSquaresAsInts(){
+		int[] squares = new int[housesAndKalahs.length];
+		for(int i=0; i<housesAndKalahs.length; ++i){
+			squares[i] = housesAndKalahs[i].getSeeds();
+		}
+		return squares;
 	}
 	
 	boolean gameNotOver(){

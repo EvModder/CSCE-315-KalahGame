@@ -1,3 +1,4 @@
+
 import javax.swing.JLabel;
 
 public class HouseLabel extends JLabel implements KalahSquare{
