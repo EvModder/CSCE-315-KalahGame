@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -106,5 +107,14 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 		waitingFrame.setVisible(false);
 		waitingFrame.dispose();
 		waitingTimer.cancel();
+	}
+	
+	static Map<String,String> settings;
+	public static Map<String, String> getSettings(){
+		//load settings
+		if(settings == null) settings = FileIO.loadYaml("settings.yml",
+						KalahGame.class.getResourceAsStream("/settings.yml"));
+		
+		return settings;
 	}
 }

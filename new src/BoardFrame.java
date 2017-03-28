@@ -13,7 +13,7 @@ class BoardFrame extends JFrame{
 	
 	//index [0] is leftmost house of player 1
 	HouseButton[] housesAndKalahs;
-	int numHouses;
+	final int numHouses;
 	
 	BoardFrame(int numHouses, int numSeeds){
 		this.numHouses = numHouses;
@@ -110,9 +110,11 @@ class BoardFrame extends JFrame{
 	void collectLeftoverSeeds(){
 		for(int i=0; i<numHouses; ++i){
 			housesAndKalahs[numHouses].addSeeds(housesAndKalahs[i].getSeeds());
+			housesAndKalahs[i].setSeeds(0);
 		}
-		for(int i=numHouses+1; i<housesAndKalahs.length; ++i){
+		for(int i=numHouses+1; i<housesAndKalahs.length-1; ++i){
 			housesAndKalahs[housesAndKalahs.length-1].addSeeds(housesAndKalahs[i].getSeeds());
+			housesAndKalahs[i].setSeeds(0);
 		}
 	}
 	
@@ -138,6 +140,15 @@ class BoardFrame extends JFrame{
 		}
 		for(int i=0; i<numHouses; ++i){
 			housesAndKalahs[i+numHouses+1].setSeeds(housesAndKalahs[i].getSeeds());
+		}
+	}
+	
+	void pieRule(){
+		//swap all houses
+		for(int i=0; i<numHouses; ++i){
+			int temp = housesAndKalahs[i].getSeeds();
+			housesAndKalahs[i].setSeeds(housesAndKalahs[i+numHouses+1].getSeeds());
+			housesAndKalahs[i+numHouses+1].setSeeds(temp);
 		}
 	}
 	

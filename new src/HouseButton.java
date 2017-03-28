@@ -23,7 +23,7 @@ public class HouseButton extends JButton implements KalahSquare{
 			idx = i;
 		}
 		@Override public void actionPerformed(ActionEvent evt){
-			System.out.println("Button"+idx+" pressed");
+//			System.out.println("Button"+idx+" pressed");
 //			board.moveSeeds(idx);
 			KalahGame.move = idx;
 			KalahGame.waitingForMove = false;
