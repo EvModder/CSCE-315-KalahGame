@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.Random;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -98,7 +99,7 @@ class BoardFrame extends JFrame{
 	
 	void enableButtons(){
 		for(int i=0; i<numHouses; ++i)
-			if(housesAndKalahs[i].getSeeds() > 0)
+			if(housesAndKalahs[i].getSeeds() != 0)
 				housesAndKalahs[i].setEnabled(true);
 	}
 	void disableButtons(){
@@ -115,18 +116,43 @@ class BoardFrame extends JFrame{
 		}
 	}
 	
-	boolean isWinning(){
-		return housesAndKalahs[numHouses].getSeeds() >
-			   housesAndKalahs[housesAndKalahs.length-1].getSeeds();
+	int getScoreDifference(){
+		return housesAndKalahs[numHouses].getSeeds()
+				- housesAndKalahs[housesAndKalahs.length-1].getSeeds();
 	}
 	
 	boolean validMove(int i){
 		return (housesAndKalahs[i].getSeeds() != 0 && i != numHouses && i != numHouses*2+1);
 	}
+	
+	void randomizeSeeds(){
+		int seedCount = 1;
+		for(int i=0; i<numHouses; ++i){
+			seedCount += housesAndKalahs[i].getSeeds();
+			housesAndKalahs[i].setSeeds(0);
+		}
+		
+		Random rand = new Random();
+		while(--seedCount > 0){
+			housesAndKalahs[rand.nextInt(numHouses)].addSeeds(1);
+		}
+		for(int i=0; i<numHouses; ++i){
+			housesAndKalahs[i+numHouses+1].setSeeds(housesAndKalahs[i].getSeeds());
+		}
+	}
+	
+	boolean gameNotOver(){
+		boolean noSeeds = true;
+		for(int i=0; i<numHouses; ++i) if(housesAndKalahs[i].getSeeds() != 0){
+			noSeeds = false;
+			break;
+		}
+		if(noSeeds) return false;
+		noSeeds = true;
+		for(int i=numHouses+1; i<housesAndKalahs.length-1; ++i) if(housesAndKalahs[i].getSeeds() != 0){
+			noSeeds = false;
+			break;
+		}
+		return !noSeeds;
+	}
 }
-/*
-   * * * 9 8 7
-13              6
-   0 1 2 3 4 5
-
-*/

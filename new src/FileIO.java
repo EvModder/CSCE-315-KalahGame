@@ -168,7 +168,7 @@ public class FileIO {
 				while(line != null){
 					line = line.replace("//", "#").trim();
 					int idx = line.indexOf('#');
-					if(idx > 0) line = line.substring(idx);
+					if(idx > 0) line = line.substring(0,idx);
 					if(line.contains(":")){
 						String[] keyval = line.split(":");
 						map.put(keyval[0].trim(), keyval[1].trim());

@@ -7,9 +7,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.swing.JOptionPane;
+
 public class ClientMain extends Connection{
 	final int port = 42374;
-	String host = "50.24.131.142";//50.24.131.142 | 192.168.1.63 | localhost
+	String host = "165.91.48.10";//50.24.131.142 | 192.168.1.63 | localhost
 	Socket socket;
 	PrintWriter out;
 	BufferedReader in;
@@ -28,6 +30,7 @@ public class ClientMain extends Connection{
 
 	public ClientMain(MessageReceiver rec){
 		super(rec);
+		host = JOptionPane.showInputDialog("Please enter the Host Address", "localhost");
 		try{
 			socket = new Socket(host, port);
 			out = new PrintWriter(socket.getOutputStream());

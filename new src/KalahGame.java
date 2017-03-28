@@ -1,38 +1,32 @@
-
 import java.util.Map;
-
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
 import ServerUtils.*;
 import ServerUtils.Connection.MessageReceiver;
 
 class KalahGame implements MessageReceiver{
 	private BoardFrame board;
-	public static int move;
+	public static int move, timeLimit;
 	public static boolean waitingForMove=true;
 	
 	Connection connection;
 	boolean waitingForInfo=true, waitingForReady=true, waitingForOK=true, waitingForYourMove=true;
-	boolean isServer, myTurn, gameOver, illegal;
+	boolean isServer, myTurn, gameOver;
 	
-	JFrame source;
-	public KalahGame(boolean isServer, JFrame source){
+	public KalahGame(boolean isServer){
 		this.isServer = isServer;
-		this.source = source;
 		
-		//open wait for clients window <<<<<<<<<<<<<<<<<
-		source.setVisible(false);
-		
-		connection = isServer ? new ServerMain(this) : new ClientMain(this);
+		Utils.showWaitingWindow();
+		Utils.menuFrame.setVisible(false);
 		
 		//Main game thread
-		new Thread(){
-		@Override public void run(){
+		new Thread(){@Override public void run(){
+			connection = isServer ? new ServerMain(KalahGame.this) : new ClientMain(KalahGame.this);
+			
 			if(!connection.isClosed()){
 				JOptionPane.showMessageDialog(null, "Error - Unable to connect!",
 							"Connection issue", JOptionPane.ERROR_MESSAGE);
-				source.setVisible(true);
+				Utils.menuFrame.setVisible(true);
+				Utils.closeWaitingWindow();
 				return;
 			}
 			if(isServer){
@@ -40,8 +34,8 @@ class KalahGame implements MessageReceiver{
 				Map<String,String> settings = FileIO.loadYaml("settings.yml",
 								getClass().getResourceAsStream("/settings.yml"));
 				
-				int houses = Integer.parseInt(settings.get("num-houses"));
-				int seeds = Integer.parseInt(settings.get("num-seeds"));
+				int houses = Integer.parseInt(settings.get("holes-per-side"));
+				int seeds = Integer.parseInt(settings.get("seeds-per-hole"));
 				String first = settings.get("starting-player");
 				String type = settings.get("game-type");
 				board = new BoardFrame(houses, seeds);
@@ -49,7 +43,18 @@ class KalahGame implements MessageReceiver{
 				
 				//print INFO
 				connection.println("WELCOME");
-				connection.println("INFO "+houses+" "+seeds+" "+first+" "+type);
+				StringBuilder builder = new StringBuilder("INFO ").append(houses)
+						.append(' ').append(seeds).append(' ').append(first).append(' ').append(type);
+				
+				if(type.equals("R")){
+					//randomize board, then send it to client
+					board.randomizeSeeds();
+					for(int i=0; i<board.numHouses; ++i){
+						builder.append(' ').append(board.housesAndKalahs[i].getSeeds());
+					}
+				}
+				
+				connection.println(builder.toString());
 				
 				while(waitingForReady) yield();//wait for client to be ready
 			}
@@ -57,16 +62,15 @@ class KalahGame implements MessageReceiver{
 				while(waitingForInfo) yield();//wait for INFO
 				connection.println("READY");
 			}
-//			if(!myTurn) board.disableButtons();
-			//close wait window here, set board visible <<<<<<<<<<<<<<<<<
 			board.setVisible(true);
+			Utils.closeWaitingWindow();
 			
 			System.out.println("Starting game!");
 			
-			while(gameNotOver()){
+			while(board.gameNotOver() && !gameOver){
 				//if it is my turn
 				if(myTurn){
-					System.out.println("My turn!");
+					System.out.println("Waiting for myself to move");
 					board.enableButtons();
 					StringBuilder message = new StringBuilder("");
 					//wait for this player to move, make moves as long as they hit their Kalah
@@ -88,7 +92,7 @@ class KalahGame implements MessageReceiver{
 					myTurn = false;
 				}
 				else{
-					System.out.println("Waiting for opponent");
+					System.out.println("Waiting for opponent to move");
 					while(waitingForYourMove && !gameOver) yield();//wait for opponent
 					waitingForYourMove = true;
 					myTurn = true;
@@ -96,47 +100,35 @@ class KalahGame implements MessageReceiver{
 			}
 			if(isServer){
 				board.collectLeftoverSeeds();
-				if(illegal || board.isWinning()){
+				int score = board.getScoreDifference();
+				if(score > 0){
 					connection.println("LOSER");
+					connection.close();
 					JOptionPane.showMessageDialog(null, "You win!");
+				}
+				else if(score == 0){
+					connection.println("TIE");
+					connection.close();
+					JOptionPane.showMessageDialog(null, "The game was a tie.");
 				}
 				else{
 					connection.println("WINNER");
+					connection.close();
 					JOptionPane.showMessageDialog(null, "You lose!");
 				}
-				gameOver = true;
 			}
 			else{
 				while(!gameOver) yield();//wait for results
+				connection.close();
 			}
 			
 //			System.out.println("Score1 = "+board.housesAndKalahs[board.numHouses]);
 //			System.out.println("Score2 = "+board.housesAndKalahs[board.numHouses*2+1]);
 			
-			connection.close();
 			board.setVisible(false);
 			board.dispose();
-			source.setVisible(true);
+			Utils.menuFrame.setVisible(true);
 		}}.start();
-	}
-	
-	boolean gameNotOver(){
-		if(gameOver) return false;
-		
-		int i=0, len = board.numHouses;
-		boolean noSeeds = true;
-		for(; i<len; ++i) if(board.housesAndKalahs[i].getSeeds() != 0){
-			noSeeds = false;
-			break;
-		}
-		if(noSeeds) return false;
-		
-		len += len + 1; ++i;
-		for(; i<len; ++i) if(board.housesAndKalahs[i].getSeeds() != 0){
-			noSeeds = false;
-			break;
-		}
-		return !noSeeds;
 	}
 	
 	
@@ -148,7 +140,15 @@ class KalahGame implements MessageReceiver{
 		else if(args[0].equals("INFO")){// INFO 4 1 5000 F S
 			
 			board = new BoardFrame(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-			myTurn = args[3].equals("F"); //gameType = args[3]
+			timeLimit = Integer.parseInt(args[3]);
+			myTurn = args[4].equals("F");
+			if(args[5].equals("R")){
+				for(int i=0; i<board.numHouses; ++i){
+					int seeds = Integer.parseInt(args[i+5]);
+					board.housesAndKalahs[i].setSeeds(seeds);
+					board.housesAndKalahs[i+board.numHouses+1].setSeeds(seeds);
+				}
+			}
 			waitingForInfo = false;
 		}
 		else if(args[0].equals("LOSER")){
