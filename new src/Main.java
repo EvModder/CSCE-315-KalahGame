@@ -18,9 +18,7 @@ import javax.swing.WindowConstants;
 
 @SuppressWarnings("unused")
 class Main{
-	public static void main(String... args){new Main();}
-	
-	Main(){
+	public static void main(String... args){
 		Utils.createMenuWindow();
 	}
 }
