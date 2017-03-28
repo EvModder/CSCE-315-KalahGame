@@ -70,7 +70,9 @@ class KalahGame implements MessageReceiver{
 			while(board.gameNotOver() && !gameOver){
 				//if it is my turn
 				if(myTurn){
+					//TODO: time my own move. If I timeout, make myself lose.
 					System.out.println("Waiting for myself to move");
+					
 					board.enableButtons();
 					StringBuilder message = new StringBuilder("");
 					//wait for this player to move, make moves as long as they hit their Kalah
@@ -92,13 +94,16 @@ class KalahGame implements MessageReceiver{
 					myTurn = false;
 				}
 				else{
+					//TODO: if I am the server, time the opponent's move, if they timeout make them lose.
 					System.out.println("Waiting for opponent to move");
+					
 					while(waitingForYourMove && !gameOver) yield();//wait for opponent
 					waitingForYourMove = true;
 					myTurn = true;
 				}
 			}
-			if(isServer){
+			//if I am the server and the game needs to be ended, end it naturally
+			if(isServer && !gameOver){
 				board.collectLeftoverSeeds();
 				int score = board.getScoreDifference();
 				if(score > 0){
