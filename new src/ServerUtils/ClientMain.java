@@ -11,12 +11,11 @@ import javax.swing.JOptionPane;
 
 public class ClientMain extends Connection{
 	final int port = 42374;
-	String host = "165.91.48.10";//50.24.131.142 | 192.168.1.63 | localhost
+	String host = "10.202.42.225";//50.24.131.142 | 192.168.1.63 | localhost
 	Socket socket;
 	PrintWriter out;
 	BufferedReader in;
 	Thread ioThread;
-	StringBuilder outgoing;
 
 	@Override
 	public void close(){
@@ -58,13 +57,6 @@ public class ClientMain extends Connection{
 								System.out.println("Received: "+line);
 								receiver.receiveMessage(line);
 							}
-							
-//							if(outgoing != null){
-//								System.out.println("Sending: "+outgoing.toString());
-//								out.print(outgoing.toString());
-//								out.flush();
-//								outgoing = null;
-//							}
 						}
 						catch(IOException e){e.printStackTrace();}
 					}
@@ -77,8 +69,6 @@ public class ClientMain extends Connection{
 	
 	@Override
 	public void println(String message){
-//		if(outgoing == null) outgoing = new StringBuilder(message).append('\n');
-//		else outgoing.append(message).append('\n');
 		out.println(message);
 		out.flush();
 		System.out.println("Sent: "+message);

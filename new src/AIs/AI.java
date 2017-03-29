@@ -43,4 +43,8 @@ public abstract class AI {
 		}
 		return i;
 	}
+	
+	boolean isValid(int[] board, int move){
+		return move < board.length/2-1 && board[move] != 0;
+	}
 }

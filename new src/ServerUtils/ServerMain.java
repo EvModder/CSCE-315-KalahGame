@@ -12,7 +12,6 @@ public class ServerMain extends Connection{
 	ServerSocket socket;
 	Client client;
 	Thread ioThread;
-	StringBuilder outgoing;
 	
 	class Client {
 		Socket socket;
@@ -56,12 +55,6 @@ public class ServerMain extends Connection{
 								System.out.println("Received: "+line);
 								rec.receiveMessage(line);
 							}
-//							if(outgoing != null){
-//								System.out.println("Sending: "+outgoing.toString());
-//								client.out.print(outgoing.toString());
-//								client.out.flush();
-//								outgoing = null;
-//							}
 						}
 					}
 					catch(IOException e){e.printStackTrace();}
@@ -78,8 +71,6 @@ public class ServerMain extends Connection{
 	
 	@Override
 	public void println(String message){
-//		if(outgoing == null) outgoing = new StringBuilder(message).append('\n');
-//		else outgoing.append(message).append('\n');
 		client.out.println(message);
 		client.out.flush();
 		System.out.println("Sent: "+message);

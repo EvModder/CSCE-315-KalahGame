@@ -65,7 +65,7 @@ public class Utils {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Instructions button pressed");
 				//instructions()
-/*
+
 System.out.println("The objective is to have more seeds in your 'Kalah' at the end of the game.\n"
 		+ "You and your opponent take turns moving the seeds according to the following rules.\n"
 		+ "1. You can only move the seeds on your side of the Kalah board.\n"
@@ -74,7 +74,7 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 		+ "4. If the last seed lands on your Kalah, you get to go again.\n"
 		+ "5. If the last seed lands on an empty house on your side,"
 		+ "you get all the seeds from your opponent's house directly opposite from yours.\n");
-*/
+
 			}
 		});
 		buttonPanel = new JPanel(new GridLayout());

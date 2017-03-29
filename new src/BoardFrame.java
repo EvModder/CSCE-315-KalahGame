@@ -125,7 +125,8 @@ class BoardFrame extends JFrame{
 	}
 	
 	boolean validMove(int i){
-		return (housesAndKalahs[i].getSeeds() != 0 && i != numHouses && i != numHouses*2+1);
+		return i < housesAndKalahs.length && i != numHouses && i != numHouses*2+1
+				&& housesAndKalahs[i].getSeeds() != 0;
 	}
 	
 	void randomizeSeeds(){

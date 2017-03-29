@@ -18,6 +18,7 @@ class KalahGame implements MessageReceiver{
 	
 	public KalahGame(boolean isServer){
 		this.isServer = isServer;
+		Map<String,String> settings = Utils.getSettings();
 		
 		Utils.showWaitingWindow();
 		Utils.menuFrame.setVisible(false);
@@ -34,7 +35,7 @@ class KalahGame implements MessageReceiver{
 				return;
 			}
 			//load settings
-			Map<String,String> settings = Utils.getSettings();
+			
 			playAsAI = Boolean.parseBoolean(settings.get("play-as-AI"));
 			AI ai = new DumbAI();
 			
