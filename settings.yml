@@ -1,0 +1,8 @@
+holes-per-side: 6
+seeds-per-hole: 4
+time-limit: 5000
+starting-player: F // F=client, S=server
+count-leftovers: true
+play-as-AI: false
+
+game-type: S // S=standard, R=random
