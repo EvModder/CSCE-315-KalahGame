@@ -19,7 +19,7 @@ public class AI2 {
 	public int generateMove(Board input, int depth){
 		root = new TreeNode(input);
 		constructTree(root, depth);
-		minimax(root, depth);//, TreeNode.min, TreeNode.max);
+		minimax(root, depth);
 		int index = -1;
 		int alpha = TreeNode.min;
 		int beta = TreeNode.max;
@@ -156,45 +156,4 @@ public class AI2 {
 		}
 		return -1;
 	}
-	// old version
-	/*public int minimax(TreeNode n, int depth, int min, int max){
-		if (n.isLeaf() || depth == 0){
-			return utility(n);
-		}
-
-		if (n.getCurrState().getPlayerTurn()){
-			int temp = min;
-			for (TreeNode e:n.children){
-				e.setAlpha(n.getAlpha());
-				e.setBeta(n.getBeta());
-				int child = minimax(e, depth-1, temp, max);
-				if (child > temp){
-					temp = child;
-					n.setAlpha(temp);
-				}
-				if (temp >= max){
-					return max;
-				}
-			}
-			return temp;
-		}
-		else if (!n.getCurrState().getPlayerTurn()){
-			int temp = max;
-			for (TreeNode e:n.children){
-				e.setAlpha(n.getAlpha());
-				e.setBeta(n.getBeta());
-				int child = minimax(e, depth-1, min, temp);
-				if (child < temp){
-					temp = child;
-					n.setBeta(temp);
-				}
-				if (temp <= min){
-					return min;
-				}
-			}
-			return temp;
-		}
-		return -1;
-	}
-*/
 }

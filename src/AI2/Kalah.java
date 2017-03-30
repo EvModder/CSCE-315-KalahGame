@@ -13,7 +13,7 @@ public class Kalah{
 		gameBoard.instructions();
 	}
 	
-	public void play(){
+	public void play(int depth){
 		Scanner scan = new Scanner(System.in);
 		String userInput = "";
 		int userIndex;
@@ -61,7 +61,7 @@ public class Kalah{
 						userIndex = Integer.parseInt(userInput);
 						//TODO: make move*/
 						AI2 myAI = new AI2();
-						userIndex = myAI.generateMove(gameBoard, 9);
+						userIndex = myAI.generateMove(gameBoard, depth);
 						System.out.println("Computer chose: " + userIndex);
 					}
 				}
