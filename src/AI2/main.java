@@ -1,3 +1,5 @@
+package AI2;
+
 import java.util.*;
 
 public class main{

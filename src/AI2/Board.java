@@ -1,3 +1,5 @@
+package AI2;
+
 public class Board{
 	/*
 	 * Class members
