@@ -1,9 +1,16 @@
-package AIs;
+package AI;
 import java.util.List;
+
+import com.sun.scenario.Settings;
 
 public abstract class AI {
 	abstract public List<Integer> getMove(int[] board, int timelimit);
 	abstract public boolean doPieRule(int[] board, int timelimit);
+	
+	boolean doEmptyCapture;
+	public AI(){
+		doEmptyCapture = Boolean.parseBoolean(Settings.get("empty-capture"));
+	}
 	
 	int simulateMove(int[] board, int from){
 		int numHouses = board.length/2-1;
@@ -23,7 +30,6 @@ public abstract class AI {
 				if(i == numHouses) continue;
 			}
 			--numSeeds;
-			
 			++board[i];
 		}
 		
@@ -33,13 +39,15 @@ public abstract class AI {
 				(!player1 && i > numHouses && i < board.length-1)
 		)){
 			int capture = i + (numHouses - i) * 2;
+			if(board[capture] == 0 && !doEmptyCapture) return i;
 			
 			int seeds = board[i] + board[capture];
 			
 			if(player1) board[numHouses] += seeds;
 			else board[numHouses*2+1] += seeds;
 			
-			board[i] = board[capture] = 0;
+			board[i] = 0;
+			board[capture] = 0;
 		}
 		return i;
 	}

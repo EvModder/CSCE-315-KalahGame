@@ -1,13 +1,14 @@
-package AIs;
+package AI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class RandomAI extends AI{
+	Random rand = new Random();
+	
 	@Override
 	public List<Integer> getMove(int[] board, int timelimit){
 		int numHouses = board.length/2-1;
-		Random rand = new Random();
 		
 		List<Integer> moves = new ArrayList<Integer>();
 		
@@ -25,6 +26,6 @@ public class RandomAI extends AI{
 	
 	@Override
 	public boolean doPieRule(int[] board, int timelimit){
-		return true;
+		return rand.nextBoolean();
 	}
 }

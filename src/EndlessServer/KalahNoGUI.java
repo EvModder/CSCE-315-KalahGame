@@ -1,45 +1,36 @@
-package Main;
+package EndlessServer;
 import AI.*;
 import ServerUtils.*;
 import ServerUtils.Connection.MessageReceiver;
 import Main.Utils.*;
+import Main.*;
 
-public class KalahGame implements MessageReceiver, TimerListener{
-	private BoardFrame board;
-	public static int move;
-	public static boolean waitingForMove=true;
+public class KalahNoGUI implements MessageReceiver, TimerListener{
+	private BoardNoGUI board;
 	
 	Connection connection;
 	boolean waitingForInfo=true, waitingForReady=true, waitingForOK=true, waitingForYourMove=true;
-	public boolean isServer, myTurn, gameOver, playAsAI;
+	public boolean isServer, myTurn, gameOver/*, playAsAI=true*/;//NoGUI is always AI
 	int pieRuleChooser, timeLimit;
 	
-	public KalahGame(boolean isServer){
+	public KalahNoGUI(boolean isServer){
 		this(isServer, null);
 	}
-	public KalahGame(boolean isServer, Connection conn){
+	public KalahNoGUI(boolean isServer, Connection conn){
 		this.isServer = isServer;
-		playAsAI = Boolean.parseBoolean(Settings.getSetting("play-as-AI"));
 		AI ai = new DumbAI();//TODO: select an AI to play with
-		
-		Utils.openWaitingWindow();
-		Utils.closeMenuWindow();
 		
 		//Main game thread
 		new Thread(){@Override public void run(){
 			if(conn == null){
-				connection = isServer ? new ServerSide(KalahGame.this) : new ClientSide(KalahGame.this);
+				connection = isServer ? new ServerSide(KalahNoGUI.this) : new ClientSide(KalahNoGUI.this);
 			}
 			else{
 				connection = conn;
-				connection.setReceiver(KalahGame.this);
-				System.out.println("I am the receiver");
+				connection.setReceiver(KalahNoGUI.this);
 			}
-			Utils.closeWaitingWindow();
 			
 			if(connection.isClosed()){
-				Utils.connectionErrorWindow();
-				Utils.openMenuWindow();
 				return;
 			}
 			
@@ -49,7 +40,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				timeLimit = Integer.parseInt(Settings.getSetting("time-limit"));
 				String first = Settings.getSetting("starting-player");
 				String type = Settings.getSetting("game-type");
-				board = new BoardFrame(houses, seeds);
+				board = new BoardNoGUI(houses, seeds);
 				myTurn = !first.equals("F");
 				
 				//print INFO
@@ -63,7 +54,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 					//randomize board, then send it to client
 					board.randomizeSeeds();
 					for(int i=0; i<board.numHouses; ++i){
-						builder.append(' ').append(board.housesAndKalahs[i].getSeeds());
+						builder.append(' ').append(board.housesAndKalahs[i]);
 					}
 				}
 				
@@ -75,9 +66,8 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				while(waitingForInfo) yield();//wait for INFO
 				connection.println("READY");
 			}
-			board.setVisible(true);
 			
-			System.out.println("Starting game!");
+			System.out.println("Starting a game");
 			pieRuleChooser = myTurn ? 2 : 1;
 			
 			while(board.gameNotOver() && !gameOver){
@@ -85,13 +75,12 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				if(myTurn){
 					//Time my own move. If I timeout, make myself lose.
 //					System.out.println("Waiting for myself to move");
-					Utils.startTimer(KalahGame.this, timeLimit);
+					Utils.startTimer(KalahNoGUI.this, timeLimit);
 					
 					//if I get to choose pie rule
 					if(pieRuleChooser == 1){
 						pieRuleChooser = 0;
-						if((!playAsAI && Utils.getPieRuleWindow()) ||
-							(playAsAI && ai.doPieRule(board.getSquaresAsInts(), timeLimit)))
+						if(ai.doPieRule(board.getCopy(), timeLimit))
 						{
 							Utils.cancelTimer();//I have decided my move
 							connection.println("P");
@@ -104,31 +93,15 @@ public class KalahGame implements MessageReceiver, TimerListener{
 							continue;
 						}
 					}
+					for(int i : board.housesAndKalahs)
+						System.out.print(i+" ");
+					System.out.println("");
 					
 					StringBuilder message = new StringBuilder("");
-					if(playAsAI){//get ai move
-						for(int move : ai.getMove(board.getSquaresAsInts(), timeLimit)){
-							message.append(move+1);
-							if(board.moveSeeds(move) == board.numHouses) message.append(' ');
-						}
-					}
-					else{//get player move
-						board.enableButtons();
-						//wait for this player to move, make moves as long as they hit their Kalah
-						while(waitingForMove && !gameOver){
-							while(waitingForMove && !gameOver) yield();
-							if(!board.validMove(move)){
-								waitingForMove = true;
-								continue;
-							}
-							message.append(move+1);
-							if(board.moveSeeds(move) == board.numHouses && board.gameNotOver()){
-								message.append(' ');
-								waitingForMove = true;
-							}
-						}
-						waitingForMove = true;
-						board.disableButtons();
+					for(int move : ai.getMove(board.getCopy(), timeLimit)){
+						message.append(move+1);
+						if(board.moveSeeds(move) == board.numHouses) message.append(' ');
+						else break;
 					}
 					Utils.cancelTimer();//I have finished my move.
 					
@@ -136,7 +109,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 					connection.println(message.toString());
 					myTurn = false;
 					
-					Utils.startTimer(KalahGame.this, timeLimit);//TODO: REMOVE THIS LINE IN SUBMISSION
+					Utils.startTimer(KalahNoGUI.this, timeLimit);//TODO: REMOVE THIS LINE IN SUBMISSION
 					while(waitingForOK && !gameOver) yield();//wait for opponent to confirm move
 					waitingForOK = true;
 					Utils.cancelTimer();//TODO: REMOVE THIS LINE IN SUBMISSION
@@ -144,7 +117,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				else{
 					//Time the opponent's move, if they timeout make them lose.
 					//System.out.println("Waiting for opponent to move");
-					Utils.startTimer(KalahGame.this, timeLimit);
+					Utils.startTimer(KalahNoGUI.this, timeLimit);
 					while(waitingForYourMove && !gameOver) yield();//wait for opponent
 					Utils.cancelTimer();
 					
@@ -160,30 +133,15 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				}
 				int score = board.getScoreDifference();
 				
-				GameResult result;
-				if(score > 0){
-					result = GameResult.WON;
-					endTheGame(GameResult.LOST);
-				}
-				else if(score == 0){
-					result = GameResult.TIED;
-					endTheGame(GameResult.TIED);
-				}
-				else{
-					result = GameResult.LOST;
-					endTheGame(GameResult.WON);
-				}
-				Utils.openGameOverWindow(result);
+				if(score > 0) endTheGame(GameResult.LOST);
+				else if(score == 0) endTheGame(GameResult.TIED);
+				else endTheGame(GameResult.WON);
 			}
 			else{
 				while(!gameOver) yield();//wait for results
 			}
-//			System.out.println("Score1 = "+board.housesAndKalahs[board.numHouses]);
-//			System.out.println("Score2 = "+board.housesAndKalahs[board.numHouses*2+1]);
-			
-			board.setVisible(false);
-			board.dispose();
-			Utils.openMenuWindow();
+//			System.out.println("MyScore = "+board.housesAndKalahs[board.numHouses]);
+//			System.out.println("UrScore = "+board.housesAndKalahs[board.numHouses*2+1]);
 		}}.start();
 	}
 	
@@ -191,23 +149,20 @@ public class KalahGame implements MessageReceiver, TimerListener{
 //		gameOver = true;//game always ends on timeout
 		
 		if(myTurn){//oops, they win... We timed out
-			if(isServer){
-				endTheGame(GameResult.WON);
-				Utils.openGameOverWindow(GameResult.TIME);
-			}
+			if(isServer) endTheGame(GameResult.TIME);
 			//else /* hey, we timed out but the server hasn't noticed... :)*/;
 		}
 		else{//they timed out!
-			if(isServer){
-				endTheGame(GameResult.TIME);
-				Utils.openGameOverWindow(GameResult.WON);
-			}
+			if(isServer) endTheGame(GameResult.TIME);
 			//else /* im just a client. the server is cheating and i cant do anything :(*/
 		}
 	}
 	
 	void endTheGame(GameResult result){
 		switch(result){
+		case TIME:
+			connection.println("TIME\nLOSER");
+			break;
 		case WON:
 			connection.println("WINNER");
 			break;
@@ -217,17 +172,14 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		case TIED:
 			connection.println("TIE");
 			break;
-		case TIME:
-			connection.println("TIME\nLOSER");
-			break;
 		case ILLEGAL:
 			connection.println("ILLEGAL\nLOSER");
 			break;
 		}
 		connection.close();
+		System.out.println("Ending a game");
 		gameOver = true;
 	}
-	
 	
 	//---------- I/O ----------------------------------------------------
 	public boolean parseServerMessage(String... args){
@@ -238,14 +190,14 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		}
 		else if(args[0].equals("INFO")){// INFO 4 1 5000 F S
 			
-			board = new BoardFrame(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			board = new BoardNoGUI(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 			timeLimit = Integer.parseInt(args[3]);
 			myTurn = args[4].equals("F");
 			if(args[5].equals("R")){
 				for(int i=0; i<board.numHouses; ++i){
 					int seeds = Integer.parseInt(args[i+6]);
-					board.housesAndKalahs[i].setSeeds(seeds);
-					board.housesAndKalahs[i+board.numHouses+1].setSeeds(seeds);
+					board.housesAndKalahs[i] = seeds;
+					board.housesAndKalahs[i+board.numHouses+1] = seeds;
 				}
 			}
 			waitingForInfo = false;
@@ -274,7 +226,6 @@ public class KalahGame implements MessageReceiver, TimerListener{
 					Settings.getSetting("count-leftovers"))){
 				board.collectLeftoverSeeds();
 			}
-			Utils.openGameOverWindow(result);
 			gameOver = true;
 		}
 		return true;
@@ -301,14 +252,13 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				if(!board.validMove(move) || land != board.housesAndKalahs.length-1){
 					//They moved more times than they should have
 					if(isServer) endTheGame(GameResult.ILLEGAL);
-					else System.out.println("Server made an illegal move!");
+					return;
 				}
 				land = board.moveSeeds(move);
 			}
 			if(land == board.housesAndKalahs.length-1 && board.gameNotOver()){
 				//They stopped sending moves sooner they should have
 				if(isServer) endTheGame(GameResult.ILLEGAL);
-				else System.out.println("Server made an illegal non-move!");
 				return;
 			}
 			waitingForYourMove = false;
@@ -321,13 +271,12 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				connection.println("OK");
 			}
 			else if(isServer) endTheGame(GameResult.ILLEGAL);
-			else System.out.println("Server made an illegal pie rule move!");
 		}
 		else if(args[0].equals("OK")){
 			waitingForOK = false;
 		}
 		else if(isServer && !parseClientMessage(args)){
-			endTheGame(GameResult.ILLEGAL);
+			 endTheGame(GameResult.ILLEGAL);
 		}
 		else if(!isServer && !parseServerMessage(args)){
 			System.out.println("Unable to parse message from server!");

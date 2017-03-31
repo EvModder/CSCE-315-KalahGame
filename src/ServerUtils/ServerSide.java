@@ -7,51 +7,42 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ServerMain extends Connection{
+public class ServerSide extends Connection{
 	final int port = 42374;
 	ServerSocket socket;
-	Client client;
-	Thread ioThread;
-	
-	class Client {
-		Socket socket;
-		PrintWriter out;
-		BufferedReader in;
-		Client(Socket connection){
-			socket = connection;
-			try {
-				out = new PrintWriter(connection.getOutputStream());
-				in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			}
-			catch(IOException e){e.printStackTrace();}
-		}
-	}
+	Socket clientSocket;
+	PrintWriter out;
+	BufferedReader in;
 	
 	@Override
 	public boolean isClosed(){
-		return socket == null || socket.isClosed() || client == null || client.socket.isClosed();
+		return socket == null || socket.isClosed() || clientSocket == null || clientSocket.isClosed();
 	}
 	
-	public ServerMain(MessageReceiver rec){
+	public ServerSide(MessageReceiver rec){
 		super(rec);
 		try{socket = new ServerSocket(port);}
 		catch(IOException e){e.printStackTrace();return;}
 		System.out.println("Server opened, waiting for client...");
 		
-		try{client = new Client(socket.accept());}
+		try{
+			clientSocket = socket.accept();
+			out = new PrintWriter(clientSocket.getOutputStream());
+			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		}
 		catch(IOException e){e.printStackTrace();}
 		System.out.println("Client connected");
 		
-		ioThread = new Thread(){
+		new Thread(){
 			@Override public void run() {
 				while(!socket.isClosed()){
 					try{
-						if(client.socket.isClosed()){
+						if(clientSocket.isClosed()){
 							System.out.println("The client left the server!");
 						}
 						else{
-							while(client.in.ready()){
-								String line = client.in.readLine();
+							while(in.ready()){
+								String line = in.readLine();
 								System.out.println("Received: "+line);
 								rec.receiveMessage(line);
 							}
@@ -60,19 +51,21 @@ public class ServerMain extends Connection{
 					catch(IOException e){e.printStackTrace();}
 				}
 			}
-		};
-		ioThread.start();
+		}.start();
 	}
 	
 	@Override
 	public void close(){
-		if(socket != null) try{socket.close();} catch(IOException e){}
+		try{
+			if(socket != null) socket.close();
+			if(clientSocket != null) clientSocket.close();
+		}catch(IOException e){}
 	}
 	
 	@Override
 	public void println(String message){
-		client.out.println(message);
-		client.out.flush();
+		out.println(message);
+		out.flush();
 		System.out.println("Sent: "+message);
 	}
 }

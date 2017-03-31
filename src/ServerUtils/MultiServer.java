@@ -9,23 +9,27 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
 
-public class ServerMain extends Timer{
-	public static void main(String[] args){new ServerMain();}
+public class MultiServer{
 	
-	int port = 42374;
-	int MAX_CLIENTS = 3;
+	public interface ConnectionReceiver{
+		void gotConnection(Connection connection);
+	}
+	
+	final int port = 42374;
+	int MAX_CLIENTS = 2;
 	ServerSocket socket;
 	List<Client> clients;
-	Thread connectionWaitThread, ioThread;
-	StringBuilder outgoing;
+	Thread connectionWaitThread;
+	ConnectionReceiver receiver;
+	boolean closeServer;
 	
-	class Client {
+	class Client extends Connection{
 		Socket socket;
 		PrintWriter out;
 		BufferedReader in;
 		Client(Socket connection){
+			super(null);
 			socket = connection;
 			try {
 				out = new PrintWriter(connection.getOutputStream());
@@ -33,9 +37,22 @@ public class ServerMain extends Timer{
 			}
 			catch(IOException e){e.printStackTrace();}
 		}
+		@Override public boolean isClosed() {
+			return socket == null || socket.isClosed();
+		}
+
+		@Override public void close() {
+			try{socket.close();}catch(IOException e){e.printStackTrace();}
+		}
+
+		@Override public void println(String message) {
+			out.println(message);
+			out.flush();
+		}
 	}
 	
-	public ServerMain(){
+	public MultiServer(ConnectionReceiver connRec){
+		receiver = connRec;
 		try{socket = new ServerSocket(port);}
 		catch(IOException e){e.printStackTrace();return;}
 		
@@ -44,7 +61,7 @@ public class ServerMain extends Timer{
 				try{
 					clients = new ArrayList<Client>();
 					
-					while(true){
+					while(!closeServer){
 						Socket connection = socket.accept();
 						if(clients.size() == MAX_CLIENTS){
 							PrintWriter temp = new PrintWriter(connection.getOutputStream());
@@ -53,7 +70,11 @@ public class ServerMain extends Timer{
 							connection.close();
 							continue;
 						}
-						clients.add(new Client(connection));
+						synchronized(clients){
+							Client newClient = new Client(connection);
+							clients.add(newClient);
+							connRec.gotConnection(newClient);
+						}
 						System.out.println("Got a connection to a client");
 					}
 				}
@@ -62,52 +83,41 @@ public class ServerMain extends Timer{
 		};
 		connectionWaitThread.start();
 		
-		ioThread = new Thread(){
+		new Thread(){
 			@Override public void run() {
-				while(!socket.isClosed()){
-					Iterator<Client> it = clients.iterator();
-					while(it.hasNext()){
-						Client client = it.next();
-						try{
-							if(client.socket.isClosed()){
-								it.remove();
-								System.out.println("A client left the server");
-							}
-							else{
-								if(client.in.ready()){
-									String incoming = client.in.readLine();
-									System.out.println("Received from client: "+incoming);
-									//TODO: send received message to game board to process
+				while(!socket.isClosed() && !closeServer){
+					synchronized(clients){
+						Iterator<Client> it = clients.iterator();
+						while(it.hasNext()){
+							Client client = it.next();
+							try{
+								if(client.socket.isClosed()){
+									it.remove();
+									System.out.println("A client left the server");
 								}
-								if(outgoing != null){
-									client.out.print(outgoing.toString());
-									client.out.flush();
+								else{
+									if(client.in.ready()){
+										client.receiver.receiveMessage(client.in.readLine());
+									}
 								}
 							}
+							catch(IOException e){e.printStackTrace();}
 						}
-						catch(IOException e){e.printStackTrace();}
 					}
-					outgoing = null;
 				}
 			}
-		};
-		ioThread.start();
+		}.start();
 		
 		System.out.println("Server opened");
 	}
 	
 	@SuppressWarnings("deprecation")
 	public void close(){
+		closeServer = true;
+		synchronized(clients){
+			for(Client client : clients) client.close();
+		}
 		connectionWaitThread.stop();
 		if(socket != null) try{socket.close();} catch(IOException e){}
-	}
-	
-	public int numClients(){
-		return clients.size();
-	}
-	
-	public void println(String message){
-		if(outgoing == null) outgoing = new StringBuilder(message).append('\n');
-		else outgoing.append(message).append('\n');
 	}
 }

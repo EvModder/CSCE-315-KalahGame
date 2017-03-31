@@ -8,9 +8,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import Main.Utils;
 
-public class ClientMain extends Connection{
+public class ClientSide extends Connection{
 	final int port = 42374;
-	String host = "10.202.42.225";//50.24.131.142 | 192.168.1.63 | localhost
 	Socket socket;
 	PrintWriter out;
 	BufferedReader in;
@@ -26,9 +25,9 @@ public class ClientMain extends Connection{
 		return socket == null || socket.isClosed();
 	}
 
-	public ClientMain(MessageReceiver rec){
+	public ClientSide(MessageReceiver rec){
 		super(rec);
-		host = Utils.getHostNameWindow();
+		String host = Utils.getHostNameWindow();
 		try{
 			socket = new Socket(host, port);
 			out = new PrintWriter(socket.getOutputStream());
@@ -47,7 +46,8 @@ public class ClientMain extends Connection{
 		else{
 			System.out.println("Connected to server");
 
-			ioThread = new Thread(){
+			//ioThread
+			new Thread(){
 				@Override public void run(){
 					while(!socket.isClosed()){
 						try{
@@ -59,10 +59,8 @@ public class ClientMain extends Connection{
 						}
 						catch(IOException e){e.printStackTrace();}
 					}
-//					System.out.print("Server closed. Reconnect? ");
 				}
-			};
-			ioThread.start();
+			}.start();
 		}
 	}
 	

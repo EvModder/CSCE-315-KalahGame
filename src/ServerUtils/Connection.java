@@ -1,6 +1,5 @@
 package ServerUtils;
 
-
 public abstract class Connection {
 	MessageReceiver receiver;
 	
@@ -9,6 +8,10 @@ public abstract class Connection {
 	}
 	
 	public Connection(MessageReceiver rec){
+		receiver = rec;
+	}
+	
+	public final void setReceiver(MessageReceiver rec){
 		receiver = rec;
 	}
 	

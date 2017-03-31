@@ -45,6 +45,7 @@ class BoardFrame extends JFrame{
 		setPreferredSize(new Dimension(800, 200));
 		setMinimumSize(new Dimension(150+20*this.numHouses, 100));
 		setTitle("Timer: 5:00");//setTitle("Kalah Board");
+		setName("Board");
 		add(panel);
 //		add(new JLabel("Timer: 5:00", SwingConstants.CENTER), BorderLayout.SOUTH);
 		add(housesAndKalahs[kalah2], BorderLayout.WEST);
@@ -104,8 +105,7 @@ class BoardFrame extends JFrame{
 	
 	void enableButtons(){
 		for(int i=0; i<numHouses; ++i)
-			if(housesAndKalahs[i].getSeeds() != 0)
-				housesAndKalahs[i].setEnabled(true);
+			housesAndKalahs[i].setEnabled(housesAndKalahs[i].getSeeds() != 0);
 	}
 	void disableButtons(){
 		for(int i=0; i<numHouses; ++i)

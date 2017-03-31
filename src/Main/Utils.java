@@ -17,8 +17,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.ImageIcon;
 
 public class Utils {
+	//TODO: Completely remodel this class -- the disgusting staticness is horrible
+	//and makes impossible to host a server which plays against multiple clients
 	private static JFrame waitingFrame, menuFrame;
 	private static JLabel waitingLabel;
 	private static Timer waitingTimer;
@@ -36,17 +39,19 @@ public class Utils {
 		}, timelimit);
 	}
 	public static void cancelTimer(){
-		waitingTimer.cancel();
-		waitingTimer = null;
+		if(waitingTimer != null){
+			waitingTimer.cancel();
+			waitingTimer = null;
+		}
 	}
 	
 	public static void openMenuWindow(){
-		if(menuFrame != null){
+		if(menuFrame != null && menuFrame.isDisplayable()){
 			menuFrame.setVisible(true);
 			return;
 		}
 		menuFrame = new JFrame("~ Kalah ~");
-//		menu.setIconImage(new ImageIcon(Main.class.getResource("/seeds.png")).getImage());
+		menuFrame.setIconImage(new ImageIcon(Main.class.getResource("/seeds.png")).getImage());
 		menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		menuFrame.setPreferredSize(new Dimension(400, 200));
 		
@@ -112,7 +117,7 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 	}
 	
 	public static void openWaitingWindow(){
-		if(waitingFrame == null){
+		if(waitingFrame == null || !waitingFrame.isDisplayable()){
 			waitingFrame = new JFrame("Waiting to start");
 			waitingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			waitingLabel = new JLabel("Waiting for opponent", SwingConstants.CENTER);
@@ -145,6 +150,7 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 	}
 	
 	public static String getHostNameWindow(){
+		//default host is 'localhost'
 		//TODO: Implement a nice looking window to ask "What is the host address?"
 		return JOptionPane.showInputDialog("Please enter the Host Address",
 											Settings.getSetting("last-host"));
@@ -158,7 +164,7 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
 	}
 	
-	public enum GameResult{WON,LOST,TIED,TIME};
+	public enum GameResult{WON,LOST,TIED,TIME,ILLEGAL};
 	public static void openGameOverWindow(GameResult ending){
 		//TODO: Implement a nice looking window displaying the game result
 		String message = "Tie?";
@@ -174,6 +180,9 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 				break;
 			case TIME:
 				message = "You did not move in time!";
+				break;
+			case ILLEGAL:
+				message = "The server thought you were cheating";
 				break;
 		}
 		JOptionPane.showMessageDialog(null, message, "Game Over", JOptionPane.DEFAULT_OPTION);

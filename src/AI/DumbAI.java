@@ -1,4 +1,4 @@
-package AIs;
+package AI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +9,14 @@ public class DumbAI extends AI{
 		
 		List<Integer> moves = new ArrayList<Integer>();
 		
-		boolean moveAgain = true;
-		while(moveAgain){
-			moveAgain = false;
+		boolean hitKalah = true;
+		while(hitKalah){
+			hitKalah = false;
 			for(int i=numHouses-1; i>=0; --i){
-				if(board[i] == numHouses-i){
+				if(board[i] % (board.length-1) == numHouses-i){
 					moves.add(i);
 					simulateMove(board, i);
-					moveAgain = true;
+					hitKalah = true;
 					break;
 				}
 			}
