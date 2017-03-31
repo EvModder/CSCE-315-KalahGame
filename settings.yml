@@ -1,8 +1,13 @@
 holes-per-side: 6
 seeds-per-hole: 4
-time-limit: 5000
-starting-player: F // F=client, S=server
-count-leftovers: true
+time-limit: 100000 //in milliseconds
+starting-player: S // F=client, S=server
 play-as-AI: false
-
 game-type: S // S=standard, R=random
+last-host: 127.0.0.1 //default is 'localhost'
+
+//WARNING: Because of the limited design outlined in the Changes.pdf,
+//these settings cannot be sent with 'INFO', so to use them you will
+//need to make sure that both players have them set to the same values.
+empty-capture: false
+count-leftovers: true
