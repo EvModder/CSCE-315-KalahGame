@@ -56,13 +56,19 @@ public class BoardWindow extends JFrame{
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		add(panel);
 //		add(new JLabel("Timer: 5:00", SwingConstants.CENTER), BorderLayout.SOUTH);
+		boardSquares[kalah1].setPreferredSize(new Dimension(80, 100));
+		boardSquares[kalah2].setPreferredSize(new Dimension(80, 100));
 		add(boardSquares[kalah1], BorderLayout.EAST);
 		add(boardSquares[kalah2], BorderLayout.WEST);
-		setPreferredSize(new Dimension(150+64*kalah1, 150));
-		setMinimumSize(new Dimension(150+39*kalah1, 100));
+		setPreferredSize(new Dimension(160+64*kalah1, 160));
+		setMinimumSize(new Dimension(160+39*kalah1, 100));
 		pack();
 		setLocationRelativeTo(guiHandler.menuFrame);
 		setVisible(true);
+	}
+
+	public void updateTimer(long time){
+		setTitle(String.format("%.1f", time/1000F));
 	}
 	
 		

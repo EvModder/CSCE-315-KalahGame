@@ -59,13 +59,6 @@ public class HouseButton extends JButton implements KalahSquare{
 			}
 		}
 	};
-	
-//	@Override public void setEnabled(boolean val){
-//		super.setEnabled(val);
-//		if(val == true){
-//			
-//		}
-//	}
 
 /*
 	@Override public Dimension getPreferredSize() {

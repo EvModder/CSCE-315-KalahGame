@@ -79,6 +79,10 @@ public class GUIManager {
 			boardFrame.boardSquares[i].setEnabled(false);
 	}
 	
+	public void updateBoardTimer(long time){
+		if(boardFrame != null) boardFrame.updateTimer(time);
+	}
+	
 	protected void setMove(int m){boardMove = m;}
 	public int getMove(){int temp = boardMove; boardMove = null; return temp;}
 	public boolean hasMove(){return boardMove != null;}
