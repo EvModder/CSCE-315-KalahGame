@@ -22,30 +22,40 @@ public class NatesMinMaxAI extends AI{
 		if(working) return null;
 		List<Integer> moves = new ArrayList<Integer>();
 		if(++turn == 1)/* first move */;
-		else if(turn == 2)/* pie rule? */;
+		else if(turn == 2){/* pie rule? */
+			moves.add(-1);
+			return moves;
+		}
 		
 		//1 second buffer to account for network lag
-		timer.startTimer(new TimerListener(){@Override public void timerEnded(){working = false;}},
-				Math.max(timelimit-1000, timelimit-10));
+		timer.startTimer(
+			new TimerListener(){
+				@Override public void timerEnded(){working = false;}
+				@Override public void timeElapsed(long time){}
+			},
+			Math.max(timelimit-1000, timelimit-10)
+		);
 		
 		if(!makingTree) new Thread(){@Override public void run(){
-			//generate tree, add moves
+			//TODO: generate tree, add moves
 		}}.start();
 		
 		while(working) Thread.yield();
-		//get moves using tree
+		//TODO: get moves using tree
 		return moves;
 	}
 	
 	int getUtilityValue(Board board){
 		utility.board = board.getCopy();
 		utility.getMove();
+		if(!utility.board.gameNotOver()) utility.board.collectLeftoverSeeds();
 		return utility.board.getScoreDifference() +
 				utility.board.getSeedDifference()/board.kalah2();//kalah2 = length-1
 	}
 
-	@Override public void applyMove(int move){
+	@Override public void applyOpponentMove(int move){
 		++turn;
+		board.moveSeeds(move);
 		//TODO: update tree with move
 	}
 }

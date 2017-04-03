@@ -11,5 +11,6 @@ public abstract class AI {
 	}
 	
 	abstract public List<Integer> getMove();
-	abstract public void applyMove(int move);//0 means pie rule
+	abstract public void applyOpponentMove(int move);//Apply opponent move. -1 means pie rule
+	public void updateBoard(Board b){board=b;}
 }

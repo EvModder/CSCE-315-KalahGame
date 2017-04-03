@@ -65,5 +65,5 @@ public class DumbJordanAI extends AI{
 	public boolean doPieRule(Board board, int timelimit) {
 		return true;
 	}
-	@Override public void applyMove(int move){board.moveSeeds(move);}
+	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 }

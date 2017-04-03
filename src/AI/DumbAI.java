@@ -7,7 +7,7 @@ import Main.Board;
 public class DumbAI extends AI{
 	public DumbAI(Board board, int time){super(board, time);}
 	
-	@Override public void applyMove(int move){board.moveSeeds(move);}
+	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 	@Override public List<Integer> getMove(){
 		List<Integer> moves = new ArrayList<Integer>();
 		

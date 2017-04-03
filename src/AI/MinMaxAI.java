@@ -16,11 +16,12 @@ public class MinMaxAI extends AI{
 		List<Integer> moves = new ArrayList<Integer>();
 		
 		weHaveTime = true;
-		timer.startTimer(new TimerListener(){
-			@Override public void timerEnded(){
-				weHaveTime = false;
-			}
-		}, timelimit-1000);//1 second buffer to account for network lag
+		timer.startTimer(
+			new TimerListener(){
+				@Override public void timerEnded(){weHaveTime = false;}
+				@Override public void timeElapsed(long time){}
+			}, timelimit-1000
+		);//1 second buffer to account for network lag
 		
 		new Thread(){
 			@Override public void run(){
@@ -37,5 +38,5 @@ public class MinMaxAI extends AI{
 		return board.housesAndKalahs[board.kalah1()] - board.housesAndKalahs[board.kalah2()];
 	}
 
-	@Override public void applyMove(int move){board.moveSeeds(move);}
+	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 }

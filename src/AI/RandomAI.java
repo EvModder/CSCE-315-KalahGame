@@ -2,7 +2,6 @@ package AI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import Main.Board;
 
 public class RandomAI extends AI{
@@ -12,17 +11,16 @@ public class RandomAI extends AI{
 	@Override public List<Integer> getMove(){
 		List<Integer> moves = new ArrayList<Integer>();
 		
-		//pick random moves
-		int move;
+		int move = rand.nextInt(board.kalah1());
+		int land;
 		do{
-			move = rand.nextInt(board.numHouses);
+			while(!board.validMove(move)) move = rand.nextInt(board.kalah1());
 			moves.add(move);
-			board.moveSeeds(move);
-			
-		}while(board.willHitKalah(move));
+			land = board.moveSeeds(move);
+		}while(land == board.kalah1() && board.gameNotOver());
 		
 		return moves;
 	}
 	
-	@Override public void applyMove(int move) {board.moveSeeds(move);}
+	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 }
