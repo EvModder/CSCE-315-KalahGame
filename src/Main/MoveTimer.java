@@ -6,6 +6,7 @@ public class MoveTimer {
 	
 	public interface TimerListener{
 		void timerEnded();
+		void timeElapsed(long time);
 	}
 	
 	public void startTimer(TimerListener listener, long timelimit){
@@ -14,7 +15,11 @@ public class MoveTimer {
 		long end = System.currentTimeMillis()+timelimit;
 		alive = true;
 		thread = new Thread(){@Override public void run(){
-			while(alive && System.currentTimeMillis() < end) yield();
+			long current;
+			while(alive && (current = System.currentTimeMillis()) < end){
+				if(current % 100 == 0) listener.timeElapsed(end-current);
+				yield();
+			}
 			if(alive){
 				listener.timerEnded();
 				alive = false;

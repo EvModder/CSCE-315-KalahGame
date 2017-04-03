@@ -1,4 +1,6 @@
 package Main;
+import java.util.List;
+
 import AI.*;
 import GUI.GUIManager;
 import GUI.GUIManager.GameResult;
@@ -17,7 +19,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	
 	private boolean waitingForInfo=true, waitingForReady=true,
 					waitingForOK=true, waitingForYourMove=true,
-					waitingForBegin, isServer, myTurn, gameOver;
+					waitingForBegin, isServer, playAsAI, myTurn, gameOver;
 	
 	public KalahGame(GUIManager handler, Settings settings){
 		this(handler, settings, null);
@@ -69,8 +71,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	}
 	
 	private void playGame(){
-		boolean playAsAI = settings.getBoolean("play-as-AI");
-		AI ai = null;
+		playAsAI = settings.getBoolean("play-as-AI");
 		
 		if(isServer){//set up game, send INFO
 			int houses = settings.getInt("holes-per-side");
@@ -113,6 +114,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				}
 			}
 			guiHandler.openBoardWindow(board.housesAndKalahs);
+			if(playAsAI) ai = new DumbAI(board.getCopy(), timeLimit); //TODO: Select an AI to play with
 			connection.println(builder.toString());
 
 			while(waitingForReady) Thread.yield();//wait for client to be ready
@@ -120,6 +122,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		}
 		else{
 			while(waitingForInfo) Thread.yield();//wait for INFO
+			if(playAsAI) ai = new DumbAI(board.getCopy(), timeLimit); //TODO: Select an AI to play with
 			connection.println("READY");
 			waitingForBegin = settings.getBoolean("use-BEGIN");
 			while(waitingForBegin) Thread.yield();//wait for BEGIN
@@ -127,66 +130,56 @@ public class KalahGame implements MessageReceiver, TimerListener{
 
 //		System.out.println("Starting game!");
 		pieRuleChooser = myTurn ? 2 : 1;
-		if(playAsAI) ai = new RandomAI(board, timeLimit); //TODO: select an AI to play with
 
 		while(board.gameNotOver() && !gameOver){
 			if(myTurn){
 				//Time my own move. If I timeout, make myself lose.
 				timer.startTimer(this, timeLimit);
-
-				//if I get to choose pie rule
-				if(pieRuleChooser == 1){
-					pieRuleChooser = 0;
-					if((!playAsAI && guiHandler.getPieRuleWindow()) ||
-							(playAsAI && ai.getMove().get(0) == 0))//0 means pie rule
-					{
-						timer.cancelTimer();//I have decided my move
-						connection.println("P");
-						board.pieRule();
-						guiHandler.updateBoardWindow(board.housesAndKalahs);
-						myTurn = false;
-
-						//wait for opponent to confirm move
-						while(waitingForOK && !gameOver) Thread.yield();
-						waitingForOK = true;
-						continue;
-					}
-				}
-
+				
 				StringBuilder message = new StringBuilder("");
 				if(playAsAI){
-					for(int move : ai.getMove()){
-						message.append(move+1);
-						if(board.moveSeeds(move) == board.kalah1()) message.append(' ');
+					List<Integer> moves = ai.getMove();
+					if(pieRuleChooser == 1 && (pieRuleChooser=0)==0 && moves.get(0) == -1){
+						message.append("P");
+						board.pieRule();
 					}
-					guiHandler.updateBoardWindow(board.housesAndKalahs);
-				}
-				else{
-					//wait for the player to move, make moves as long as they hit their Kalah
-					boolean anotherMove = true;
-					while(anotherMove && !gameOver){
-						anotherMove = false;
-						guiHandler.enableButtons();
-						
-						while(!guiHandler.hasMove() && !gameOver) Thread.yield();
-						if(gameOver) break;
-						int move = guiHandler.getMove();
-						
-						if(board.validMove(move)){
+					else{
+						for(int move : moves){
 							message.append(move+1);
-							if(board.moveSeeds(move) == board.kalah1() && board.gameNotOver()){
-								message.append(' ');
-								anotherMove = true;
-							}
-							guiHandler.updateBoardWindow(board.housesAndKalahs);
-						}
-						else{
-							anotherMove = true;
+							if(board.moveSeeds(move) == board.kalah1()) message.append(' ');
 						}
 					}
-					guiHandler.disableButtons();
 				}
+				else{//if not AI
+					if(pieRuleChooser == 1 && (pieRuleChooser=0)==0 && guiHandler.getPieRuleWindow()){
+						message.append("P");
+						board.pieRule();
+					}
+					else{//not pie rule
+						boolean anotherMove = true;
+						while(anotherMove && !gameOver){
+							anotherMove = false;
+							guiHandler.enableButtons();
+							
+							while(!guiHandler.hasMove() && !gameOver) Thread.yield();
+							if(gameOver) break;
+							int move = guiHandler.getMove();
+							
+							if(board.validMove(move)){
+								message.append(move+1);
+								if(board.moveSeeds(move) == board.kalah1() && board.gameNotOver()){
+									message.append(' ');
+									guiHandler.updateBoardWindow(board.housesAndKalahs);
+									anotherMove = true;
+								}
+							}
+							else anotherMove = true;
+						}
+						guiHandler.disableButtons();
+					}
+				}//player move
 				timer.cancelTimer();//I have finished my move.
+				guiHandler.updateBoardWindow(board.housesAndKalahs);
 				if(gameOver) break;
 
 				//send move to opponent
@@ -242,6 +235,14 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		}
 	}
 
+	@Override public void timeElapsed(long time){
+		guiHandler.updateBoardTimer(time);
+	}
+	
+	public boolean isGameOver(){
+		return gameOver;
+	}
+	
 	void endTheGame(GameResult result){
 		switch(result){
 		case WON:
@@ -267,11 +268,6 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		gameOver = true;
 	}
 	
-	public boolean isGameOver(){
-		return gameOver;
-	}
-
-
 	//---------- I/O ----------------------------------------------------
 	boolean parseServerMessage(String... args){
 		GameResult result = null;
@@ -335,8 +331,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		return true;
 	}
 
-	@Override
-	public void receiveMessage(String message) {
+	@Override public void receiveMessage(String message) {
 		if(gameOver) return;
 
 		String[] args = message.split(" ");
@@ -353,7 +348,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 					return;
 				}
 				land = board.moveSeeds(move);
-				ai.applyMove(move);
+				if(playAsAI) ai.applyOpponentMove(move);
 			}
 			if(land == board.kalah2() && board.gameNotOver()){
 				//They stopped sending moves sooner they should have
@@ -362,7 +357,6 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				return;
 			}
 			guiHandler.updateBoardWindow(board.housesAndKalahs);
-			
 			connection.println("OK");
 			waitingForYourMove = false;
 		}
@@ -370,7 +364,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			timer.cancelTimer();
 			if(pieRuleChooser == 2){
 				board.pieRule();
-				ai.applyMove(0);//0 means pie rule
+				if(playAsAI) ai.applyOpponentMove(-1);
 				guiHandler.updateBoardWindow(board.housesAndKalahs);
 				
 				connection.println("OK");

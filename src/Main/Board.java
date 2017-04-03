@@ -15,11 +15,10 @@ public class Board {
 		housesAndKalahs = new int[numHouses*2+2];
 		
 		for(int i=0; i<numHouses; ++i) housesAndKalahs[i] = numSeeds;
-		housesAndKalahs[numHouses] = 0;//kalah1
+		housesAndKalahs[kalah1()] = 0;
 		
-		int kalah2 = housesAndKalahs.length-1;
-		for(int i=kalah2-1; i>numHouses; --i) housesAndKalahs[i] = numSeeds;
-		housesAndKalahs[kalah2] = 0;//kalah2
+		for(int i=kalah2()-1; i>numHouses; --i) housesAndKalahs[i] = numSeeds;
+		housesAndKalahs[kalah2()] = 0;
 	}
 	
 	public Board(int numHouses, int[] squares){
@@ -28,6 +27,10 @@ public class Board {
 	}
 	
 	public int moveSeeds(int from){
+		if(from == -1){
+			pieRule();
+			return -1;
+		}
 		int numSeeds = housesAndKalahs[from];
 		housesAndKalahs[from] = 0;
 		
@@ -37,47 +40,41 @@ public class Board {
 		while(numSeeds > 0){
 			if(++i == housesAndKalahs.length) i = 0;
 			
-			if(player1){
-				if(i == housesAndKalahs.length-1) continue;
-			}
-			else{
-				if(i == numHouses) continue;
-			}
+			if((player1 && i == kalah2()) || (!player1 && i == kalah1())) continue;
+			
 			--numSeeds;
 			++housesAndKalahs[i];
 		}
 		
 		//capture pieces on the opposite square
-		if(housesAndKalahs[i] == 1 && (
-				(player1 && i < numHouses) ||
-				(!player1 && i > numHouses && i < housesAndKalahs.length-1)
-		)){
-			int capture = i + (numHouses - i) * 2;
+		if(housesAndKalahs[i] == 1 &&
+				((player1 && i < kalah1()) || (!player1 && i > kalah1() && i < kalah2())))
+		{
+			int capture = housesAndKalahs.length - 2 - i;
 			if(housesAndKalahs[capture] == 0/* && !doEmptyCapture*/) return i;
 			
 			int seeds = housesAndKalahs[i] + housesAndKalahs[capture];
 			
-			if(player1) housesAndKalahs[numHouses] += seeds;
-			else housesAndKalahs[numHouses*2+1] += seeds;
+			if(player1) housesAndKalahs[kalah1()] += seeds;
+			else housesAndKalahs[kalah2()] += seeds;
 			
-			housesAndKalahs[i] = 0;
-			housesAndKalahs[capture] = 0;
+			housesAndKalahs[i] = housesAndKalahs[capture] = 0;
 		}
 		return i;
 	}
 	
 	public boolean willHitKalah(int from){
 		return housesAndKalahs[from] % (housesAndKalahs.length-1)
-				== (from < numHouses ? numHouses-from : housesAndKalahs.length-1-from);
+				== (from < numHouses ? kalah1()-from : kalah2()-from);
 	}
 	
 	public void collectLeftoverSeeds(){
 		for(int i=0; i<numHouses; ++i){
-			housesAndKalahs[numHouses] += housesAndKalahs[i];
+			housesAndKalahs[kalah1()] += housesAndKalahs[i];
 			housesAndKalahs[i] = 0;
 		}
 		for(int i=housesAndKalahs.length-2; i>numHouses; --i){
-			housesAndKalahs[housesAndKalahs.length-1] += housesAndKalahs[i];
+			housesAndKalahs[kalah2()] += housesAndKalahs[i];
 			housesAndKalahs[i] = 0;
 		}
 	}
