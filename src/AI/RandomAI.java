@@ -3,29 +3,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import Main.Board;
+
 public class RandomAI extends AI{
+	public RandomAI(Board board, int time){super(board, time);}
 	Random rand = new Random();
 	
-	@Override
-	public List<Integer> getMove(int[] board, int timelimit){
-		int numHouses = board.length/2-1;
-		
+	@Override public List<Integer> getMove(){
 		List<Integer> moves = new ArrayList<Integer>();
 		
 		//pick random moves
-		int i;
+		int move;
 		do{
-			i = rand.nextInt(numHouses);
-			moves.add(i);
-			simulateMove(board, i);
+			move = rand.nextInt(board.numHouses);
+			moves.add(move);
+			board.moveSeeds(move);
 			
-		}while(board[i] == numHouses-i);
+		}while(board.willHitKalah(move));
 		
 		return moves;
 	}
 	
-	@Override
-	public boolean doPieRule(int[] board, int timelimit){
-		return rand.nextBoolean();
-	}
+	@Override public void applyMove(int move) {board.moveSeeds(move);}
 }

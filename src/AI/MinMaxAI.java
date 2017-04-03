@@ -2,20 +2,22 @@ package AI;
 import java.util.ArrayList;
 import java.util.List;
 
-import Main.Utils;
-import Main.Utils.TimerListener;
+import Main.Board;
+import Main.MoveTimer;
+import Main.MoveTimer.TimerListener;;
 
 public class MinMaxAI extends AI{
+	public MinMaxAI(Board board, int time){super(board, time);}
+
+	MoveTimer timer = new MoveTimer();
 	boolean weHaveTime;
-	List<Integer> moves = new ArrayList<Integer>();
 	
-	@Override
-	public List<Integer> getMove(int[] board, int timelimit){
-		moves.clear();
+	@Override public List<Integer> getMove(){
+		List<Integer> moves = new ArrayList<Integer>();
 		
 		weHaveTime = true;
-		Utils.startTimer(new TimerListener(){
-			@Override public void timerEnded() {
+		timer.startTimer(new TimerListener(){
+			@Override public void timerEnded(){
 				weHaveTime = false;
 			}
 		}, timelimit-1000);//1 second buffer to account for network lag
@@ -30,8 +32,10 @@ public class MinMaxAI extends AI{
 		return moves;
 	}
 	
-	@Override
-	public boolean doPieRule(int[] board, int timelimit){
-		return true;
+	//TODO: modify this as you see fit!
+	public int utilityFunction(Board board){
+		return board.housesAndKalahs[board.kalah1()] - board.housesAndKalahs[board.kalah2()];
 	}
+
+	@Override public void applyMove(int move){board.moveSeeds(move);}
 }
