@@ -1,17 +1,17 @@
 is-server: false
-holes-per-side: 5
-seeds-per-hole: 12345
-time-limit: 200000
-starting-player: F
+holes-per-side: 6
+seeds-per-hole: 4
+time-limit: 60000 //Time limit in milliseconds
+starting-player: F //F=You First, S=You Second
 play-as-AI: true
-game-type: S
-last-host: localhost
-use-BEGIN: false
-port: 42374
+game-type: S //S,R,C = Standard,Random,Custom
+custom-board: 8 6 4 2 0 1 1 0
+last-host: 10.201.85.82 //Last address successfully connected to
+use-BEGIN: false //Whether to send BEGIN to clients
+port: 42374 //The Universally Recognized Kalah Port
 
-//WARNING: Because of the limited design outlined in the Changes.pdf,
-//these settings cannot be sent with 'INFO', so to use them you will
-//need to make sure that both players have them set to the same values.
+#WARNING: Because of the limited design outlined in the Changes.pdf,
+#these settings cannot be sent with 'INFO', so to use them you will
+#need to make sure that both players have them set to the same values.
 empty-capture: false
 count-leftovers: true
-custom-board: 8 6 4 2 0 1 1 0
