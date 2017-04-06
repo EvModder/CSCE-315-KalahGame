@@ -11,7 +11,7 @@ import java.awt.FontMetrics;
 
 public class HouseButton extends JButton implements KalahSquare{
 	private static final long serialVersionUID = 1L;
-	private static ImageIcon buttonImg = new ImageIcon(HouseButton.class.getResource("/button.png"));
+	private static ImageIcon buttonImg = new ImageIcon(HouseButton.class.getResource("/hexagon.png"));
 	private int seeds;
 	private FontMetrics fm;
 
@@ -31,11 +31,11 @@ public class HouseButton extends JButton implements KalahSquare{
 		super.paintComponent(g);
 		g.drawImage(buttonImg.getImage(), 0, 0, getWidth(), getHeight(), 0, 0,
 				buttonImg.getIconWidth(), buttonImg.getIconHeight(), null);
-		if(isEnabled())
+		if(isEnabled()){
 			g.drawImage(buttonImg.getImage(), 0, 0, getWidth(), getHeight(), 0, 0,
 					buttonImg.getIconWidth(), buttonImg.getIconHeight(), null);
-		
-		
+			g.setColor(Color.LIGHT_GRAY);
+		}
 		String str = String.valueOf(seeds);
 		fm.stringWidth(str);
 		g.drawString(str, getWidth()/2-fm.stringWidth(str)/2, getHeight()/2+fm.getAscent()/2);
