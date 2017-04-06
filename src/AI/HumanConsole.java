@@ -6,7 +6,7 @@ import Main.Board;
 
 public class HumanConsole extends KalahPlayer{
 	int turn;
-	boolean waitingForMove;
+	boolean waitingForMove, waitingForOpp=true;
 	Scanner scan = new Scanner(System.in);
 	
 	public HumanConsole(Board board) {
@@ -61,11 +61,12 @@ public class HumanConsole extends KalahPlayer{
 			anotherMove = (board.moveSeeds(move) == board.kalah1() && board.gameNotOver());
 			if(anotherMove) printBoard();
 		}
+		waitingForOpp = true;
 		return moves;
 	}
 
 	@Override public void applyOpponentMove(int move) {
-		++turn;
+		if(waitingForOpp){++turn; waitingForOpp = false;}
 		board.moveSeeds(move);
 	}
 	@Override public void closeGame(){

@@ -7,7 +7,7 @@ import Main.Board;
 public class HumanGUI extends KalahPlayer{
 	BoardWindow boardFrame;
 	int turn;
-	boolean working;
+	boolean working, waitingForOpp=true;
 	
 	public HumanGUI(Board board) {
 		super(board);
@@ -41,11 +41,12 @@ public class HumanGUI extends KalahPlayer{
 			else anotherMove = true;
 		}
 		boardFrame.disableButtons();
+		waitingForOpp = true;
 		return moves;
 	}
 
 	@Override public void applyOpponentMove(int move) {
-		++turn;
+		if(waitingForOpp){ ++turn; waitingForOpp = false;}
 		board.moveSeeds(move);
 		boardFrame.updateBoard(board.housesAndKalahs);
 	}
@@ -53,7 +54,7 @@ public class HumanGUI extends KalahPlayer{
 		boardFrame.dispose();
 	}
 	@Override public void updateTimer(long time){
-		if(time == 0) working = false;
+		if(time <= 0) working = false;
 	}
 	@Override public void updateBoard(Board board){
 		this.board = board;

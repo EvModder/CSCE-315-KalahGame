@@ -5,7 +5,7 @@ import Main.Board;
 
 public class NatesMinMaxAI extends KalahPlayer{
 	StrategicAI utility;
-	boolean working, makingTree;
+	boolean working, makingTree, waitingForOpp=true;
 	Node root;
 	long turn, timeLimit, timeBuffer;
 	
@@ -39,11 +39,12 @@ public class NatesMinMaxAI extends KalahPlayer{
 			root = root.children[move];
 			moves.add(move);
 		}while(board.willHitKalah(move));
+		waitingForOpp = true;
 		return moves;
 	}
 
 	@Override public void applyOpponentMove(int move){
-		++turn;
+		if(waitingForOpp){++turn; waitingForOpp = false;}
 		board.moveSeeds(move);
 		root = root.children[move-board.kalah1()-1];
 	}
