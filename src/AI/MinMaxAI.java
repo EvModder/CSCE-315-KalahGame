@@ -1,30 +1,22 @@
 package AI;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-
 import Main.Board;
-import Main.MoveTimer;
-import Main.MoveTimer.TimerListener;;
 
-public class MinMaxAI extends AI{
+public class MinMaxAI extends KalahPlayer{
 	public static final int max = Integer.MAX_VALUE;
 	public static final int min = Integer.MIN_VALUE;
+	Node root;
 	
-	MoveTimer timer = new MoveTimer();
-	boolean turn;
-	public Node root;
-	
-	public MinMaxAI(Board board, int time, boolean whoseTurn){
-		super(board, time);
-		turn = whoseTurn;
+	public MinMaxAI(Board board){
+		super(board);
 	}
 	
 	class Node{
 		private int alpha;
 		private int beta;
 		private int move;
-		public boolean playerTurn;
+		public boolean myTurn;
 		private Board currState;
 		List<Node> children;
 		
@@ -32,7 +24,7 @@ public class MinMaxAI extends AI{
 			this.setAlpha(min);
 		    this.setBeta(max);
 		    this.setCurrState(b);
-		    this.children = new LinkedList<Node>();
+		    this.children = new ArrayList<Node>();
 		}
 
 	    public void addChild(Node node) {
@@ -76,7 +68,6 @@ public class MinMaxAI extends AI{
 		}
 	}
 	
-	//TODO: modify this as you see fit!
 	public int utilityFunction(Node n){
 		Board temp = n.getCurrState().getCopy();
 		return temp.getScoreDifference();
@@ -87,7 +78,7 @@ public class MinMaxAI extends AI{
 			return;
 		}
 		// player 1
-		if (node.playerTurn){
+		if (node.myTurn){
 			for (int i = 0; i<board.numHouses; i++){
 				Board temp = node.getCurrState().getCopy();
 				if (temp.validMove(i)){
@@ -104,14 +95,14 @@ public class MinMaxAI extends AI{
 					}
 					Node newMove = new Node(temp);
 					newMove.setMove(i);
-					newMove.playerTurn = newTurn;
+					newMove.myTurn = newTurn;
 					node.addChild(newMove);
 					constructTree(newMove, depth-1);
 				}
 			}
 		}
 		// player 2
-		else if (!node.playerTurn){
+		else if (!node.myTurn){
 			for (int i=board.kalah1()+1; i<board.kalah2(); i++){
 				Board temp = node.getCurrState().getCopy();
 				if (temp.validMove(i)){
@@ -128,7 +119,7 @@ public class MinMaxAI extends AI{
 					}
 					Node newMove = new Node(temp);
 					newMove.setMove(i - board.numHouses - 1);
-					newMove.playerTurn = newTurn;
+					newMove.myTurn = newTurn;
 					node.addChild(newMove);
 					constructTree(newMove, depth-1);
 				}
@@ -141,7 +132,7 @@ public class MinMaxAI extends AI{
 			return utilityFunction(n);
 		}
 
-		if (n.playerTurn){
+		if (n.myTurn){
 			int temp = min;
 			for (Node e:n.children){
 				e.setAlpha(n.getAlpha());
@@ -159,7 +150,7 @@ public class MinMaxAI extends AI{
 			}
 			return temp;
 		}
-		else if (!n.playerTurn){
+		else if (!n.myTurn){
 			int temp = max;
 			for (Node e:n.children){
 				e.setAlpha(n.getAlpha());
@@ -179,11 +170,7 @@ public class MinMaxAI extends AI{
 		}
 		return -1;
 	}
-	
-	public void updateBoard(Board b){
-		board = b;
-	}
-	
+		
 	@Override public List<Integer> getMove(){
 		List<Integer> moves = new ArrayList<Integer>();
 		
@@ -191,7 +178,7 @@ public class MinMaxAI extends AI{
 			@Override public void run(){
 				//generate tree, add moves
 				root = new Node(board);
-				root.playerTurn = turn;
+				root.myTurn = true;
 				constructTree(root, 9);
 				minimax(root, 9);
 				boolean keepGoing = true;
@@ -205,14 +192,14 @@ public class MinMaxAI extends AI{
 					else{
 						for (Node e:root.children){
 							//player 1
-							if (root.playerTurn){
+							if (root.myTurn){
 								if (e.getAlpha() > alpha){
 									alpha = e.getAlpha();
 									index = root.children.indexOf(e);
 								}
 							}
 							//player 2
-							else if (!root.playerTurn){
+							else if (!root.myTurn){
 								if (e.getBeta() < beta){
 									beta = e.getBeta();
 									index = root.children.indexOf(e);
@@ -220,7 +207,7 @@ public class MinMaxAI extends AI{
 							}
 						}
 						moves.add(root.children.get(index).getMove());
-						if (root.children.get(index).playerTurn == root.playerTurn){
+						if (root.children.get(index).myTurn == root.myTurn){
 							root = root.children.get(index);
 						}
 						else{

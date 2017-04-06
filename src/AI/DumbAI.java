@@ -1,11 +1,10 @@
 package AI;
 import java.util.ArrayList;
 import java.util.List;
-
 import Main.Board;
 
-public class DumbAI extends AI{
-	public DumbAI(Board board, int time){super(board, time);}
+public class DumbAI extends KalahPlayer{
+	public DumbAI(Board board){super(board);}
 	
 	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 	@Override public List<Integer> getMove(){
@@ -43,9 +42,9 @@ public class DumbAI extends AI{
 		for(int i=0; i<numHouses; ++i){
 			if(board[i] > board.length-1 || board[i] == 0) continue;
 			
-			if(board[i] == board.length-1 && board[i+numHouses+1]+2 > max){
+			if(board[i] == board.length-1 && board[board.length-2-i]+2 > max){
 				maxI = i;
-				max = board[i+numHouses+1]+2;
+				max = board[board.length-2-i]+2;//land=i
 				continue;
 			}
 			
@@ -57,7 +56,7 @@ public class DumbAI extends AI{
 				++inKalah;
 			}
 			if(land < numHouses && board[land] == 0){
-				inKalah += board[land+numHouses+1];	
+				inKalah += board[board.length-2-land];	
 				if(inKalah > max){
 					maxI = i;
 					max = inKalah;

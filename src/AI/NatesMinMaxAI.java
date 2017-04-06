@@ -1,25 +1,21 @@
 package AI;
 import java.util.ArrayList;
 import java.util.List;
-
 import Main.Board;
-import Main.MoveTimer;
-import Main.MoveTimer.TimerListener;;
 
-public class NatesMinMaxAI extends AI{
-	MoveTimer timer = new MoveTimer();
-	DumbAI utility;
+public class NatesMinMaxAI extends KalahPlayer{
+	StrategicAI utility;
 	boolean working, makingTree;
-	int turn;
+	Node root;
+	long turn, timeLimit, timeBuffer;
 	
-	public NatesMinMaxAI(Board board, int time){
-		super(board, time);
-		utility = new DumbAI(null, 0);
+	public NatesMinMaxAI(Board board){
+		super(board);
+		utility = new StrategicAI(null);
 	}
 	
-	@Override
-	public List<Integer> getMove(){
-		if(working) return null;
+	@Override public List<Integer> getMove(){
+		if(working) return null;//TODO: remove?
 		List<Integer> moves = new ArrayList<Integer>();
 		if(++turn == 1)/* first move */;
 		else if(turn == 2){/* pie rule? */
@@ -27,35 +23,106 @@ public class NatesMinMaxAI extends AI{
 			return moves;
 		}
 		
-		//1 second buffer to account for network lag
-		timer.startTimer(
-			new TimerListener(){
-				@Override public void timerEnded(){working = false;}
-				@Override public void timeElapsed(long time){}
-			},
-			Math.max(timelimit-1000, timelimit-10)
-		);
+		working = true;
 		
 		if(!makingTree) new Thread(){@Override public void run(){
+			root = new Node(board, true, getUtilityValue(board, true));
 			//TODO: generate tree, add moves
+			root.makeKids();
 		}}.start();
 		
 		while(working) Thread.yield();
-		//TODO: get moves using tree
+		
+		int move;
+		do{
+			move = root.getSourceChild();
+			root = root.children[move];
+			moves.add(move);
+		}while(board.willHitKalah(move));
 		return moves;
-	}
-	
-	int getUtilityValue(Board board){
-		utility.board = board.getCopy();
-		utility.getMove();
-		if(!utility.board.gameNotOver()) utility.board.collectLeftoverSeeds();
-		return utility.board.getScoreDifference() +
-				utility.board.getSeedDifference()/board.kalah2();//kalah2 = length-1
 	}
 
 	@Override public void applyOpponentMove(int move){
 		++turn;
 		board.moveSeeds(move);
-		//TODO: update tree with move
+		root = root.children[move-board.kalah1()-1];
+	}
+	
+	@Override public void updateTimer(long time){
+		if(time > timeLimit){
+			timeLimit = time;
+			timeBuffer = Math.min(timeLimit/5 + 10, 750);
+		}
+		else if(time < timeBuffer) working = false;
+	}
+	
+	int getUtilityValue(Board board, boolean myTurn){
+		utility.board = board.getCopy();
+		if(!myTurn) utility.board.pieRule();//swap
+		utility.getMove();
+		return myTurn ? utility.getUtilityValue() : -utility.getUtilityValue();
+	}
+
+	class Node{
+		Node(Board board, boolean max, int val){state=board; isMax=max; value=val;}
+		int value;
+		Board state;
+		Node[] children = new Node[board.numHouses];
+		boolean isMax, hasKids;
+		
+		void updateValue(){
+			if(isMax){
+				int maxV = Integer.MIN_VALUE;
+				for(Node n : children) if(n != null && n.value > maxV) maxV = n.value;
+			}
+			else{
+				int minV = Integer.MAX_VALUE;
+				for(Node n : children) if(n != null && n.value > minV) minV = n.value;
+			}
+		}
+		
+		int getSourceChild(){
+			int idx=-1;
+			if(isMax){
+				int maxV = Integer.MIN_VALUE;
+				for(int i=0; i<children.length; ++i){
+					if(children[i] != null && children[i].value > maxV){
+						maxV = children[i].value;
+						idx = i;
+					}
+				}
+			}
+			else{
+				int minV = Integer.MAX_VALUE;
+				for(int i=0; i<children.length; ++i){
+					if(children[i] != null && children[i].value > minV){
+						minV = children[i].value;
+						idx = i;
+					}
+				}
+			}
+			return idx;
+		}
+
+		void makeKids() {
+			int start, end;
+			if(isMax) { start=0; end=state.kalah1(); }
+			else { start=state.kalah1()+1; end = state.kalah2(); }
+			boolean max = !isMax;
+			
+			//TODO: separate thread to update parent
+//			int extrema = max ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+			for(int i=start, idx=0; i<end; ++i, ++idx){
+				if(state.validMove(i)){
+					Board board = state.getCopy();
+					board.moveSeeds(i);
+					int v = getUtilityValue(board, max);
+					children[idx] = new Node(board, max, v);
+//					if((max && v < extrema) || !max && (v > extrema)) extrema = v;
+				}
+			}
+//			value = extrema;
+			hasKids = true;
+		}
 	}
 }

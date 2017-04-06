@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import Main.Board;
 
-public class DumbJordanAI extends AI{
-	public DumbJordanAI(Board board, int time){super(board, time);}
+public class DumbJordanAI extends KalahPlayer{
+	public DumbJordanAI(Board board){super(board);}
 
 	boolean second  = false;
 

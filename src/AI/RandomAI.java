@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Random;
 import Main.Board;
 
-public class RandomAI extends AI{
-	public RandomAI(Board board, int time){super(board, time);}
+public class RandomAI extends KalahPlayer{
+	public RandomAI(Board board){super(board);}
 	Random rand = new Random();
 	
-	@Override public List<Integer> getMove(){
+	@Override
+	public List<Integer> getMove() {
 		List<Integer> moves = new ArrayList<Integer>();
 		
 		int move = rand.nextInt(board.kalah1());
@@ -21,6 +22,4 @@ public class RandomAI extends AI{
 		
 		return moves;
 	}
-	
-	@Override public void applyOpponentMove(int move){board.moveSeeds(move);}
 }
