@@ -25,7 +25,7 @@ public class MenuWindow extends JFrame{
 	MenuWindow(GUIManager guiHandler){
 		settings = new Settings();
 		setTitle("~ Kalah ~");
-		setIconImage(guiHandler.icon);
+		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(400, 200));
 		
@@ -86,8 +86,11 @@ System.out.println("The objective is to have more seeds in your 'Kalah' at the e
 		editSettingsButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Edit Settings button pressed");
-				//TODO: open GUI
+				if(MenuWindow.this.isVisible()){
+					MenuWindow.this.setVisible(false);
+					System.out.println("Edit Settings button pressed");
+					new EditSettingsWindow(MenuWindow.this, settings);
+				}
 			}
 		});
 		JButton reloadSettingsButton = new JButton("Reload Settings");

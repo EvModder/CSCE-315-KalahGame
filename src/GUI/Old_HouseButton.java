@@ -4,20 +4,23 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+
 import Main.KalahSquare;
+
 import java.awt.FontMetrics;
 
-public class HouseButton extends JButton implements KalahSquare{
+public class Old_HouseButton extends JButton implements KalahSquare{
 	private static final long serialVersionUID = 1L;
-	private static ImageIcon buttonImg = new ImageIcon(HouseButton.class.getResource("/button.png"));
+	private static ImageIcon buttonImg = new ImageIcon(Old_HouseButton.class.getResource("/button.png"));
 	private int seeds;
 	private FontMetrics fm;
 
-	public HouseButton(BoardWindow board, int i, int initialSeeds){
+	public Old_HouseButton(Old_GUIManager gui, int i, int initialSeeds){
 		seeds = initialSeeds;
-		addActionListener(new ButtonListener(board, i));
+		addActionListener(new ButtonListener(gui, i));
 		setEnabled(false);
 		setOpaque(false);
 		setContentAreaFilled(false);
@@ -42,9 +45,9 @@ public class HouseButton extends JButton implements KalahSquare{
 	}
 	
 	class ButtonListener implements ActionListener{
-		BoardWindow board;
+		Old_GUIManager board;
 		int idx;
-		ButtonListener(BoardWindow board, int i){
+		ButtonListener(Old_GUIManager board, int i){
 			this.board = board;
 			idx = i;
 		}
@@ -56,9 +59,23 @@ public class HouseButton extends JButton implements KalahSquare{
 			}
 		}
 	};
+
+/*
+	@Override public Dimension getPreferredSize() {
+		Dimension d = super.getPreferredSize();
+		Container c = getParent();
+		if(c != null) d = c.getSize();
+		else return new Dimension(10, 10);
+
+		int w = (int) d.getWidth();
+		int h = (int) d.getHeight();
+		int s = (w < h ? w : h);
+		return new Dimension(s, s);
+	}//*/
 	
 	@Override
 	public void setSeeds(int i) {
+//		setText(""+seeds);
 		seeds = i;
 	}
 

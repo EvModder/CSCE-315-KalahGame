@@ -12,7 +12,7 @@ class WaitingWindow extends JFrame{
 
 	WaitingWindow(GUIManager guiHandler){
 		setTitle("Waiting to start");
-		setIconImage(guiHandler.icon);
+		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JLabel waitingLabel = new JLabel("Waiting for opponent", SwingConstants.CENTER);
 		setSize(300, 100);
