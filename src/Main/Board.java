@@ -5,14 +5,15 @@ import java.util.Random;
 public class Board {
 	//index [0] is leftmost house of player 1
 	public int[] housesAndKalahs;
-	public final int numHouses;
+	public final int numHouses, kalah2;
 	
 	public int kalah1(){return numHouses;}
-	public int kalah2(){return housesAndKalahs.length-1;}
+	public int kalah2(){return kalah2;}
 	
 	public Board(int numHouses, int numSeeds){
 		this.numHouses = numHouses;
 		housesAndKalahs = new int[numHouses*2+2];
+		kalah2 = housesAndKalahs.length-1;
 		
 		for(int i=0; i<numHouses; ++i) housesAndKalahs[i] = numSeeds;
 		housesAndKalahs[kalah1()] = 0;
@@ -24,6 +25,27 @@ public class Board {
 	public Board(int numHouses, int[] squares){
 		this.numHouses = numHouses;
 		housesAndKalahs = squares;
+		kalah2 = housesAndKalahs.length-1;
+	}
+	
+	public int moveSeedsFast(int from){
+		boolean player1 = from < numHouses;
+		int each = housesAndKalahs[from] / kalah2;
+		int extra = housesAndKalahs[from] % kalah2;
+		int land = from+extra;
+		int i=from+1, end=i;
+		while(true){
+			if((player1 && i == kalah2) || (!player1 && i == numHouses)) continue;
+			housesAndKalahs[i] += each;
+			if(--extra != -1) ++housesAndKalahs[i];
+			if(++i == end) break;
+		}
+		if(housesAndKalahs[land] == 1 &&
+				((player1 && land < numHouses) || (!player1 && land > numHouses && land < kalah2)))
+		{
+			captureSeeds(land);
+		}
+		return land;
 	}
 	
 	public int moveSeeds(int from){
@@ -50,17 +72,23 @@ public class Board {
 		if(housesAndKalahs[i] == 1 &&
 				((player1 && i < kalah1()) || (!player1 && i > kalah1() && i < kalah2())))
 		{
-			int capture = housesAndKalahs.length - 2 - i;
-			if(housesAndKalahs[capture] == 0/* && !doEmptyCapture*/) return i;
-			
-			int seeds = housesAndKalahs[i] + housesAndKalahs[capture];
-			
-			if(player1) housesAndKalahs[kalah1()] += seeds;
-			else housesAndKalahs[kalah2()] += seeds;
-			
-			housesAndKalahs[i] = housesAndKalahs[capture] = 0;
+			captureSeeds(i);
 		}
 		return i;
+	}
+	
+	private void captureSeeds(int land){
+		boolean player1 = land < numHouses;
+		
+		int capture = housesAndKalahs.length - 2 - land;
+		if(housesAndKalahs[capture] == 0/* && !doEmptyCapture*/) return;
+		
+		int seeds = housesAndKalahs[land] + housesAndKalahs[capture];
+		
+		if(player1) housesAndKalahs[kalah1()] += seeds;
+		else housesAndKalahs[kalah2()] += seeds;
+		
+		housesAndKalahs[land] = housesAndKalahs[capture] = 0;
 	}
 	
 	public boolean willHitKalah(int from){
