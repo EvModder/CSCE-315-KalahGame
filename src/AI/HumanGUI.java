@@ -1,6 +1,7 @@
 package AI;
 import java.util.ArrayList;
 import java.util.List;
+
 import GUI.BoardWindow;
 import Main.Board;
 
@@ -20,6 +21,7 @@ public class HumanGUI extends KalahPlayer{
 
 		if(++turn == 2 && boardFrame.getPieRuleWindow()){
 			board.pieRule();
+			boardFrame.updateBoard(board.housesAndKalahs);
 			moves.add(-1);
 			return moves;
 		}
@@ -54,7 +56,9 @@ public class HumanGUI extends KalahPlayer{
 		boardFrame.dispose();
 	}
 	@Override public void updateTimer(long time){
-		if(time <= 0) working = false;
+//		System.out.println("time left: "+time);
+		if(time == 0) working = false;
+		boardFrame.updateTimer(time);
 	}
 	@Override public void updateBoard(Board board){
 		this.board = board;

@@ -33,6 +33,10 @@ public class AIWithGUI extends KalahPlayer {
 		boardFrame.updateBoard(board.housesAndKalahs);
 	}
 	
+	@Override public void updateTimer(long time){
+		boardFrame.updateTimer(time);
+	}
+	
 	@Override public void closeGame(){
 		boardFrame.dispose();
 	}
