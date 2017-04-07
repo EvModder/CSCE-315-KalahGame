@@ -1,6 +1,5 @@
 package Main;
 import javax.swing.ImageIcon;
-
 import GUI.GUIManager;
 
 class Main{
@@ -12,7 +11,7 @@ class Main{
 			System.setProperty("apple.awt.application.name", "Kalah");
 			
 			com.apple.eawt.Application.getApplication().setDockIconImage(
-					new ImageIcon(Main.class.getResource("/seeds.png")).getImage());
+					new ImageIcon(Main.class.getResource("/images/seeds.png")).getImage());
 		}
 		new GUIManager().openMenuWindow();
 	}

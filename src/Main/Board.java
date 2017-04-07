@@ -28,17 +28,23 @@ public class Board {
 		kalah2 = housesAndKalahs.length-1;
 	}
 	
-	public int moveSeedsFast(int from){
+	private int moveSeedsFast(int from){
 		boolean player1 = from < numHouses;
 		int each = housesAndKalahs[from] / kalah2;
 		int extra = housesAndKalahs[from] % kalah2;
-		int land = from+extra;
-		int i=from+1, end=i;
+		housesAndKalahs[from] = 0;
+		
+		int i=from, land=from;
 		while(true){
+			if(++i == housesAndKalahs.length) i = 0;
 			if((player1 && i == kalah2) || (!player1 && i == numHouses)) continue;
+			
 			housesAndKalahs[i] += each;
-			if(--extra != -1) ++housesAndKalahs[i];
-			if(++i == end) break;
+			if(extra != 0){
+				++housesAndKalahs[i];
+				if(--extra == 0) land = i;
+			}
+			if(i == from) break;
 		}
 		if(housesAndKalahs[land] == 1 &&
 				((player1 && land < numHouses) || (!player1 && land > numHouses && land < kalah2)))
@@ -53,6 +59,7 @@ public class Board {
 			pieRule();
 			return -1;
 		}
+		if(housesAndKalahs[from] > housesAndKalahs.length) return moveSeedsFast(from);
 		int numSeeds = housesAndKalahs[from];
 		housesAndKalahs[from] = 0;
 		
@@ -75,7 +82,7 @@ public class Board {
 			captureSeeds(i);
 		}
 		return i;
-	}
+	}//*/
 	
 	private void captureSeeds(int land){
 		boolean player1 = land < numHouses;

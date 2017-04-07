@@ -21,6 +21,7 @@ public class MoveTimer {
 				yield();
 			}
 			if(alive){
+				listener.timeElapsed(0);
 				listener.timerEnded();
 				alive = false;
 			}

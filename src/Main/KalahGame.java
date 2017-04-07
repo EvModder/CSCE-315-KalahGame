@@ -135,7 +135,12 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				
 				StringBuilder message = new StringBuilder("");
 				List<Integer> moves = player.getMove();
-				if(pieRuleChooser == 1 && (pieRuleChooser=0)==0 && moves.get(0) == -1){
+				if(moves.isEmpty()){
+//					System.err.println("Player did not make a valid move!");
+//					gameOver = true;
+//					break;
+				}
+				else if(pieRuleChooser == 1 && (pieRuleChooser=0)==0 && moves.get(0) == -1){
 					message.append("P");
 					board.pieRule();
 				}
@@ -170,6 +175,9 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			player.updateBoard(board);
 		}
 		
+//		System.out.println("Score1/Score2 = "+board.housesAndKalahs[board.kalah1()]+"/"
+//		 									 +board.housesAndKalahs[board.kalah2]);
+		
 		//if I am the server, send results (end the game naturally)
 		if(isServer && !gameOver){
 			int score = board.getScoreDifference();
@@ -181,8 +189,6 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		else{
 			while(!gameOver) Thread.yield();//wait for results
 		}
-//		System.out.println("Score1/Score2 = "+board.housesAndKalahs[board.kalah1()]+"/"
-//											 +board.housesAndKalahs[board.kalah2]);
 
 		System.out.println("Closing the game");
 		player.closeGame();
@@ -360,6 +366,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		}
 		else if(!isServer && !parseServerMessage(args)){
 			System.out.println("Unable to parse message from server!");
+			gameOver = true;
 		}
 	}
 }
