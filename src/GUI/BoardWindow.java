@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
-
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -13,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import Main.Settings;
 
 public class BoardWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
@@ -27,16 +27,26 @@ public class BoardWindow extends JFrame{
 		
 		int kalah1 = board.length/2-1, kalah2 = board.length-1;
 		
+		String imgName = new Settings().getString("button-image").toLowerCase();
+		ImageIcon player1Img, player2Img;
+		if(imgName.equals("awesome")){
+			player1Img = new ImageIcon(getClass().getResource("/images/awesome.png"));
+			player2Img = new ImageIcon(getClass().getResource("/images/awesome-inverse.png"));
+		}
+		else{
+			player1Img = player2Img = new ImageIcon(getClass().getResource("/images/"+imgName+".png"));
+		}
+		
 		//add houses
 		for(int i=0; i<kalah1; ++i){
-			player1Houses.add(boardSquares[i] = new HouseButton(this, i, board[i]));
+			player1Houses.add(boardSquares[i] = new HouseButton(this, i, board[i], player1Img));
 		}
 		for(int i=kalah2-1; i>kalah1; --i){
-			player2Houses.add(boardSquares[i] = new HouseButton(this, i, board[i]));
+			player2Houses.add(boardSquares[i] = new HouseButton(this, i, board[i], player2Img));
 		}
 		//add kalahs
-		boardSquares[kalah1] = new HouseButton(this, kalah1, board[kalah1]);
-		boardSquares[kalah2] = new HouseButton(this, kalah2, board[kalah2]);
+		boardSquares[kalah1] = new HouseButton(this, kalah1, board[kalah1], player1Img);
+		boardSquares[kalah2] = new HouseButton(this, kalah2, board[kalah2], player2Img);
 		
 		player1Houses.setOpaque(false); player2Houses.setOpaque(false);
 		JPanel panel = new JPanel();

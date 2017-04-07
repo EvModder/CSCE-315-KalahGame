@@ -13,7 +13,7 @@ public class MultiClientServerWindow extends JFrame{
 	public MultiClientServerWindow(){
 		setTitle("MultiClientServerAI");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setIconImage(new ImageIcon(getClass().getResource("/seeds.png")).getImage());
+		setIconImage(new ImageIcon(getClass().getResource("/images/seeds.png")).getImage());
 		setSize(320, 120);
 		setResizable(false);
 		JLabel label = new JLabel("MultiClientServerAI is running", SwingConstants.CENTER);

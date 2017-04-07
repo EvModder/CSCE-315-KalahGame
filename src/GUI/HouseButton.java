@@ -11,12 +11,15 @@ import java.awt.FontMetrics;
 
 public class HouseButton extends JButton implements KalahSquare{
 	private static final long serialVersionUID = 1L;
-	private static ImageIcon buttonImg = new ImageIcon(HouseButton.class.getResource("/hexagon.png"));
+//	public static ImageIcon buttonImg;
 	private int seeds;
 	private FontMetrics fm;
+	boolean awesome;
+	ImageIcon buttonImg;
 
-	public HouseButton(BoardWindow board, int i, int initialSeeds){
+	public HouseButton(BoardWindow board, int i, int initialSeeds, ImageIcon img){
 		seeds = initialSeeds;
+		buttonImg = img;
 		addActionListener(new ButtonListener(board, i));
 		setEnabled(false);
 		setOpaque(false);

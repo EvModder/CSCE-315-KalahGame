@@ -125,6 +125,15 @@ public class EditSettingsWindow extends JFrame{
 		customBoardPanel.add(customBoardLabel); customBoardPanel.add(customBoard);
 		customBoardPanel.setOpaque(false);
 		
+		JLabel pickButtonLabel = new JLabel("Button Image: "); pickButtonLabel.setFont(font);
+		JComboBox<String> pickButton = new JComboBox<String>(new String[]{
+				"Hexagon", "Square", "Circle", "Awesome"
+		});
+		pickButton.setSelectedItem(settings.getString("button-image"));
+		JPanel pickButtonPanel = new JPanel();
+		pickButtonPanel.add(pickButtonLabel); pickButtonPanel.add(pickButton);
+		pickButtonPanel.setOpaque(false);
+		
 		JButton menuButton = new JButton(new ImageIcon(getClass().getResource("/images/return-to-menu.png")));
 		menuButton.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent e){
@@ -139,6 +148,10 @@ public class EditSettingsWindow extends JFrame{
 				String timeLimitStr = timeLimit.getText().replace(",", "");
 				if(timeLimitStr.matches("^\\d+$")){
 					settings.set("time-limit", Integer.parseInt(timeLimitStr));
+				}
+				String buttonImg = pickButton.getSelectedItem().toString();
+				if(getClass().getResource("/images/"+buttonImg+".png") != null){
+					settings.set("button-image", buttonImg);
 				}
 				settings.set("game-type", gameTypeBox.getSelectedItem());
 				settings.set("AI-name", playerPickerBox.getSelectedItem());
@@ -164,17 +177,25 @@ public class EditSettingsWindow extends JFrame{
 		midPanel.add(timeLimitPanel);
 		midPanel.setOpaque(false);
 		
+		JPanel mid2Panel = new JPanel();
+		mid2Panel.setLayout(new BoxLayout(mid2Panel, BoxLayout.X_AXIS));
+		mid2Panel.add(startingPlayerPanel);
+		mid2Panel.add(useBEGINPanel);
+		mid2Panel.add(customBoardPanel);
+		mid2Panel.setOpaque(false);
+		
 		JPanel endPanel = new JPanel();
 		endPanel.setLayout(new BoxLayout(endPanel, BoxLayout.X_AXIS));
-		endPanel.add(startingPlayerPanel);
-		endPanel.add(useBEGINPanel);
-		endPanel.add(customBoardPanel);
+		endPanel.add(pickButtonPanel);
+//		endPanel.add();
+//		endPanel.add();
 		endPanel.setOpaque(false);
 		
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.add(topPanel);
 		panel.add(midPanel);
+		panel.add(mid2Panel);
 		panel.add(endPanel);
 		panel.setOpaque(false);
 		
