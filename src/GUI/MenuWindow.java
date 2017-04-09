@@ -57,6 +57,7 @@ public class MenuWindow extends JFrame{
 				new KalahGame(guiHandler, settings);
 			}
 		});
+		joinButton.setContentAreaFilled(false);
 		joinButton.setOpaque(false);
 		joinButton.setBorder(new MatteBorder(1, 1, 1, 1, brown));
 		joinButton.setFont(font);
@@ -70,6 +71,7 @@ public class MenuWindow extends JFrame{
 				new KalahGame(guiHandler, settings);
 			}
 		});
+		hostButton.setContentAreaFilled(false);
 		hostButton.setOpaque(false);
 		hostButton.setBorder(new MatteBorder(1, 1, 1, 1, brown));
 		hostButton.setFont(font);
@@ -84,21 +86,15 @@ public class MenuWindow extends JFrame{
 		istrButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Instructions button pressed");
-				//instructions()
-
-System.out.println("The objective is to have more seeds in your 'Kalah' at the end of the game.\n"
-		+ "You and your opponent take turns moving the seeds according to the following rules.\n"
-		+ "1. You can only move the seeds on your side of the Kalah board.\n"
-		+ "2. The seeds will move in a counter-clockwise direction\n"
-		+ "3. To move, select a non-empty house on your side of the board\n"
-		+ "4. If the last seed lands on your Kalah, you get to go again.\n"
-		+ "5. If the last seed lands on an empty house on your side,"
-		+ "you get all the seeds from your opponent's house directly opposite from yours.\n");
-
+				if(MenuWindow.this.isVisible()){
+					System.out.println("Instructions button pressed");
+					MenuWindow.this.setVisible(false);
+					new InstructionsWindow(MenuWindow.this);
+				}
 			}
 		});
 		istrButton.setOpaque(false);
+		istrButton.setContentAreaFilled(false);
 		istrButton.setBorder(new MatteBorder(1, 1, 1, 1, brown));
 		istrButton.setFont(font);//TODO: Decide font
 //		istrButton.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
