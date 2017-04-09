@@ -1,13 +1,15 @@
 is-server: false
-holes-per-side: 6
-seeds-per-hole: 4
-time-limit: 60000 //Time limit in milliseconds
-starting-player: F //F=You First, S=You Second
-play-as-AI: true
-game-type: S //S,R,C = Standard,Random,Custom
+holes-per-side: 10
+seeds-per-hole: 20
+time-limit: 10000 //Time limit in milliseconds
+starting-player: S //S=You First, S=Me First
+AI-name: HumanGUI
+use-GUI: true //Whether to use a GUI interface (to watch the AI play)
+game-type: R //R=Rtandard,R=Random,C=Custom
 custom-board: 8 6 4 2 0 1 1 0
-last-host: 10.201.85.82 //Last address successfully connected to
-use-BEGIN: false //Whether to send BEGIN to clients
+button-image: Circle
+last-host: localhost //Last address successfully connected to
+use-BEGIN: true
 port: 42374 //The Universally Recognized Kalah Port
 
 #WARNING: Because of the limited design outlined in the Changes.pdf,
