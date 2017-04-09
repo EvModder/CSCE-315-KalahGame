@@ -19,7 +19,8 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	
 	private boolean waitingForInfo=true, waitingForReady=true,
 					waitingForOK=true, waitingForYourMove=true,
-					waitingForBegin, isServer, myTurn, gameOver;
+					waitingForBegin, processingMove,
+					isServer, myTurn, gameOver;
 	
 	public KalahGame(GUIManager handler, Settings settings){
 		this(handler, settings, null);
@@ -151,8 +152,8 @@ public class KalahGame implements MessageReceiver, TimerListener{
 					}
 				}
 				timer.cancelTimer();//I have finished my move.
-				if(gameOver) break;
-
+				if(gameOver) break;//Some error happened (or time limit exceeded)
+				
 				//send move to opponent
 				myTurn = false;
 				waitingForOK = true;
@@ -164,6 +165,8 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				timer.startTimer(this, timeLimit);
 				while(waitingForYourMove && !gameOver) Thread.yield();//wait for opponent
 				waitingForYourMove = true;
+				timer.cancelTimer();
+				while(processingMove && !gameOver) Thread.yield();//finish OK'ing move
 
 				if(pieRuleChooser == 2) pieRuleChooser = 0;
 				myTurn = true;
@@ -196,6 +199,8 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	}
 
 	@Override public void timerEnded(){
+		if(gameOver) return;
+		
 		if(myTurn){//I timed out
 			if(isServer) endTheGame(GameResult.LOST);
 			else /* hey, we timed out but the server hasn't noticed... :)*/;
@@ -207,7 +212,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	}
 
 	@Override public void timeElapsed(long time){
-		player.updateTimer(time);
+		if(myTurn) player.updateTimer(time);
 	}
 	
 	public boolean isGameOver(){
@@ -242,7 +247,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	KalahPlayer getPlayer(Board board){
 		try{
 			Class<?> clazz = Class.forName("AI."+settings.getString("AI-name"));
-			if(settings.getBoolean("ai-has-GUI") && !settings.getString("AI-name").equals("HumanGUI")){
+			if(settings.getBoolean("use-GUI") && !settings.getString("AI-name").equals("HumanGUI")){
 				return new AIWithGUI(board, clazz);
 			}
 			else return (KalahPlayer) clazz.getConstructor(Board.class).newInstance(board);
@@ -289,7 +294,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			result = GameResult.TIED;
 		}
 		else if(args[0].equals("TIME")){
-			result = GameResult.TIME;
+			if(myTurn) result = GameResult.TIME;
 		}
 		else if(args[0].equals("ILLEGAL")){
 			//wth server! I was playing fair :(
@@ -324,12 +329,14 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		String[] args = message.split(" ");
 
 		if(args[0].matches("^\\d+$")){
-			timer.cancelTimer();
-			int land = board.kalah2();
+			processingMove = true;
+			waitingForYourMove = false;
+			int land = board.kalah2;
 			for(String str : args){
 				int move = Integer.parseInt(str)+board.numHouses;
-				if(!board.validMove(move) || land != board.kalah2()){
+				if(!board.validMove(move) || land != board.kalah2){
 					//They moved more times than they should have
+//					HumanConsole.printBoard(board); System.out.println(move);
 					if(isServer) endTheGame(GameResult.ILLEGAL);
 					else System.out.println("Server made an illegal move!");
 					return;
@@ -339,24 +346,27 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			}
 			if(land == board.kalah2() && board.gameNotOver()){
 				//They stopped sending moves sooner they should have
+				HumanConsole.printBoard(board);
 				if(isServer) endTheGame(GameResult.ILLEGAL);
 				else System.out.println("Server made an illegal non-move!");
 				return;
 			}
 			connection.println("OK");
-			waitingForYourMove = false;
+			processingMove = false;
 		}
 		else if(args[0].equals("P")){
-			timer.cancelTimer();
+			processingMove = true;
+			waitingForYourMove = false;
 			if(pieRuleChooser == 2){
 				board.pieRule();
 				player.applyOpponentMove(-1);
 				
 				connection.println("OK");
-				waitingForYourMove = false;
+				
 			}
 			else if(isServer) endTheGame(GameResult.ILLEGAL);
 			else System.out.println("Server made an illegal pie rule move!");
+			processingMove = false;
 		}
 		else if(args[0].equals("OK")){
 			waitingForOK = false;

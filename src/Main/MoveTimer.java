@@ -10,14 +10,16 @@ public class MoveTimer {
 	}
 	
 	public void startTimer(TimerListener listener, long timelimit){
-		if(thread != null && thread.isAlive()) return;//only supports 1 timer for now
+		while(thread != null && thread.isAlive()) Thread.yield();
+//		if(thread != null && thread.isAlive()) return;//only supports 1 timer for now
 		
 		long end = System.currentTimeMillis()+timelimit;
 		alive = true;
 		thread = new Thread(){@Override public void run(){
 			long current;
 			while(alive && (current = System.currentTimeMillis()) < end){
-				if(current % 100 == 0) listener.timeElapsed(end-current);
+//				if(current % 50 == 0)
+					listener.timeElapsed(end-current);
 				yield();
 			}
 			if(alive){
@@ -25,6 +27,7 @@ public class MoveTimer {
 				listener.timerEnded();
 				alive = false;
 			}
+//			listener.timeElapsed(0);
 		}};
 		thread.start();
 	}

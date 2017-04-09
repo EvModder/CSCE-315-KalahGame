@@ -30,6 +30,7 @@ public class FileIO {
 					if(idx >= 0) line = line.substring(0,idx);
 					if(line.contains(":")){
 						String[] keyval = line.split(":");
+//						System.out.println("Loaded: "+keyval[0].trim().toLowerCase()+"->"+keyval[1].trim());
 						map.put(keyval[0].trim().toLowerCase(), keyval[1].trim());
 					}
 				}
