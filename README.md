@@ -4,7 +4,7 @@ Authors: Andrew Lam, Nathaniel Leake, Tony Huynh
 ## Executables
 The game application comes with a few different JARs (Mains)
 * KalahGame - The primary user inferface, allows a player to join or create a game or edit settings
-* EndlessServer - Opens a server that repeatedly accepts client connections and plays against them using a randomly configured board
+* EndlessServer - A server that repeatedly accepts client connections and plays against them using an AI
 * MultiClientEndlessServer - Same as EndlessServer except can handle up to 100 games simultaneously
 
 ## Configuration
