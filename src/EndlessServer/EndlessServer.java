@@ -13,14 +13,15 @@ class EndlessServer{
 		Random rand = new Random();
 		Settings settings = new Settings();
 		KalahGame game;
-		settings.set("play-as-AI", true);
+		settings.set("AI-name", "MinMaxAIFinal");
+		settings.set("use-GUI", false);
 		settings.set("is-server", true);
 		
 		while(true){
 			//Randomize settings
-			settings.set("holes-per-side", rand.nextInt(8)+3);
-			settings.set("seeds-per-hole", rand.nextInt(10)+1);
-			settings.set("time-limit", rand.nextInt(49001)+1000);
+			settings.set("holes-per-side", rand.nextInt(10)+3);
+			settings.set("seeds-per-hole", rand.nextInt(20)+1);
+			settings.set("time-limit", rand.nextInt(10001)+800);
 			settings.set("starting-player", rand.nextBoolean() ? "S" : "F");
 			settings.set("game-type", rand.nextBoolean() ? "S" : "R");
 //			

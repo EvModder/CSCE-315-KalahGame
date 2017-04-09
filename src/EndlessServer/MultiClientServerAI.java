@@ -26,11 +26,12 @@ class MultiClientServerAI implements ConnectionReceiver{
 		new Thread(){@Override public void run(){
 			//Randomize settings
 			Settings settings = new Settings();
-			settings.set("play-as-AI", true);
+			settings.set("AI-name", "MinMaxAIFinal");
+			settings.set("use-GUI", false);
 			settings.set("is-server", true);
 			settings.set("holes-per-side", rand.nextInt(8)+3);
-			settings.set("seeds-per-hole", rand.nextInt(10)+1);
-			settings.set("time-limit", rand.nextInt(49001)+1000);
+			settings.set("seeds-per-hole", rand.nextInt(15)+1);
+			settings.set("time-limit", rand.nextInt(8000)+800);
 			settings.set("starting-player", rand.nextBoolean() ? "S" : "F");
 			settings.set("game-type", rand.nextBoolean() ? "S" : "R");
 
