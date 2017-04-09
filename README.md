@@ -39,8 +39,8 @@ There are many AIs (including some min-max AIs) which can be played against. A d
 * DumbAI #Chooses moves that land in its Kalah
 * StrategicAI #Always gets the most seeds possible from its turn
 * MinMaxAI #Has basic pruning
-* MinMaxAI2 #Has multithreading
-* MinMaxAI2WithPruning #Has multithreading and basic pruning
-* MinMaxAI3 #Uses a tree instead of a recursive function, has pruning and multithreading.
+* MinMaxAI2 #Has multithreading and basic pruning
+* MinMaxAI3 #Uses a tree instead of a recursive function, has pruning and multithreading
+* MinMaxAIFinal
 <br /><br />
-So far, MinMaxAI2 has been the most throughly tested and is recommended for optimal results.
+So far, MinMaxAIFinal has been the most throughly tested and is recommended for optimal results.
