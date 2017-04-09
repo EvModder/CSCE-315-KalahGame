@@ -115,6 +115,7 @@ public class MenuWindow extends JFrame{
 			}
 		});
 		editSettingsButton.setOpaque(false);
+		editSettingsButton.setContentAreaFilled(false);
 		editSettingsButton.setBorder(new MatteBorder(1, 1, 1, 1, brown));
 		editSettingsButton.setFont(font);
 		JButton reloadSettingsButton = new JButton("Reload Settings");

@@ -1,18 +1,12 @@
 package GUI;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
@@ -23,7 +17,7 @@ public class InstructionsWindow extends JFrame{
 		setTitle("Kalah Instructions");
 		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setSize(new Dimension(700, 300));
+		setSize(new Dimension(700, 350));
 		
 		JTextArea label = new JTextArea(
 				"The objective is to have more seeds in your 'Kalah' at the end of the game.\n"
@@ -32,9 +26,9 @@ public class InstructionsWindow extends JFrame{
 				+ "2. The seeds will move in a counter-clockwise direction\n"
 				+ "3. To move, select a non-empty house on your side of the board\n"
 				+ "4. If the last seed lands on your Kalah, you get to go again.\n"
-				+ "5. If the last seed lands on an empty house on your side, "
-				+ "you get all the seeds from your opponent's house directly opposite from yours.\n");
-		label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 17));
+				+ "5. If the last seed lands on an empty house on your side, you get a capture*\n\n\n"
+				+ "*Takes the seeds from the opposite house on the board and puts them in your Kalah");
+		label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 17));
 		label.setOpaque(false);
 		label.setEditable(false);
 		label.setLineWrap(true);
@@ -51,6 +45,7 @@ public class InstructionsWindow extends JFrame{
 		});
 		menuButton.setOpaque(false);
 		menuButton.setBorderPainted(false);
+		menuButton.setContentAreaFilled(false);
 		
 		/*setContentPane(new JComponent(){
 			private static final long serialVersionUID = 1L;

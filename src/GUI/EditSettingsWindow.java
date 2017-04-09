@@ -50,8 +50,8 @@ public class EditSettingsWindow extends JFrame{
 		
 		JLabel playerPickerLabel = new JLabel("Player: "); playerPickerLabel.setFont(font);
 		JComboBox<String> playerPickerBox = new JComboBox<String>(new String[]{
-				"HumanGUI", "HumanConsole", "DumbAI", "DumbJordanAI", "MinMaxAI", "NatesMinMaxAI",
-				"RandomAI", "StrategicAI"
+				"HumanGUI", "HumanConsole", "DumbAI"/*, "DumbJordanAI"*/,
+				"RandomAI", "StrategicAI", "BasicMinMaxAI", "BasicMinMaxAI2"
 		});
 		playerPickerBox.setSelectedItem(settings.getString("AI-name"));
 		JPanel playerPickerPanel = new JPanel();
@@ -156,12 +156,12 @@ public class EditSettingsWindow extends JFrame{
 				settings.set("game-type", gameTypeBox.getSelectedItem());
 				settings.set("AI-name", playerPickerBox.getSelectedItem());
 				settings.updateFile();
-				setVisible(false);
 				menuWindow.setVisible(true);
 			}
 		});
 		menuButton.setOpaque(false);
 		menuButton.setBorderPainted(false);
+		menuButton.setContentAreaFilled(false);
 		
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
