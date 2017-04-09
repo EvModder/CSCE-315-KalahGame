@@ -18,7 +18,7 @@ public class HumanConsole extends KalahPlayer{
 		return scan.nextLine();
 	}
 	
-	void printBoard(){
+	public static void printBoard(Board board){
 		StringBuilder builder = new StringBuilder("");
 		for(int i=board.kalah2()-1; i>board.kalah1(); --i){
 			builder.append(board.housesAndKalahs[i]).append('\t');
@@ -36,7 +36,7 @@ public class HumanConsole extends KalahPlayer{
 		List<Integer> moves = new ArrayList<Integer>();
 		waitingForMove = true;
 		
-		printBoard();
+		printBoard(board);
 
 		if(++turn == 2 && getInput("Do Pie Rule? (True/False): ").equalsIgnoreCase("True")){
 			board.pieRule();
@@ -59,7 +59,7 @@ public class HumanConsole extends KalahPlayer{
 			}
 			moves.add(move);
 			anotherMove = (board.moveSeeds(move) == board.kalah1() && board.gameNotOver());
-			if(anotherMove) printBoard();
+			if(anotherMove) printBoard(board);
 		}
 		waitingForOpp = true;
 		return moves;
@@ -72,7 +72,7 @@ public class HumanConsole extends KalahPlayer{
 	@Override public void closeGame(){
 		scan.close();
 		board.collectLeftoverSeeds();
-		printBoard();
+		printBoard(board);
 		System.out.println("Game Over!");
 	}
 	@Override public void updateTimer(long time){

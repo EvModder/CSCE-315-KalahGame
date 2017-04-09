@@ -4,220 +4,134 @@ import java.util.List;
 import Main.Board;
 
 public class MinMaxAI extends KalahPlayer{
-	public static final int max = Integer.MAX_VALUE;
-	public static final int min = Integer.MIN_VALUE;
-	Node root;
-	
+	static int INF = Integer.MAX_VALUE, NINF = -Integer.MAX_VALUE;
+	int MAX_DEPTH, OPS_PER_MILLI;//determined at runtime
+	boolean waitingForOpp=true, knownTime;
+	long turn;
+
+	int floorLogBaseX(int x, long val){
+		int count=0;
+		long n=1;
+		while(n*x <= val){
+			n *= x;
+			++count;
+		}
+		return count;
+	}
+
 	public MinMaxAI(Board board){
 		super(board);
-	}
-	
-	class Node{
-		private int alpha;
-		private int beta;
-		private int move;
-		public boolean myTurn;
-		private Board currState;
-		List<Node> children;
+		MAX_DEPTH = floorLogBaseX(board.numHouses, 1000000);//instantaneous
 		
-		public Node(Board b) {
-			this.setAlpha(min);
-		    this.setBeta(max);
-		    this.setCurrState(b);
-		    this.children = new ArrayList<Node>();
-		}
-
-	    public void addChild(Node node) {
-	        this.children.add(node);
-	    }
-	    
-	    public boolean isLeaf(){
-	    	return children.isEmpty();
-	    }
-	    
-		public int getAlpha() {
-			return alpha;
-		}
-
-		public void setAlpha(int alpha) {
-			this.alpha = alpha;
-		}
-
-		public int getBeta() {
-			return beta;
-		}
-
-		public void setBeta(int beta) {
-			this.beta = beta;
-		}
-
-		public int getMove() {
-			return move;
-		}
-
-		public void setMove(int move) {
-			this.move = move;
-		}
-
-		public Board getCurrState() {
-			return currState;
-		}
-
-		public void setCurrState(Board currState) {
-			this.currState = currState;
-		}
+		new Thread(){@Override public void run(){
+//			System.out.println("test-depth: "+MAX_DEPTH);
+//			System.out.println("Op Count="+Math.pow(board.numHouses, MAX_DEPTH));
+			
+			long time, start = System.currentTimeMillis();
+			pickBestOption(board, true, turn);
+			time = System.currentTimeMillis() - start;
+			
+//			System.out.println("Took time: "+time);
+			OPS_PER_MILLI = (int)(Math.pow(board.numHouses, MAX_DEPTH)/time);
+			
+//			System.out.println("MinMax Depth = "+MAX_DEPTH);
+//			System.out.println("Ops/Millisecond: "+OPS_PER_MILLI);
+		}}.start();
 	}
-	
-	public int utilityFunction(Node n){
-		Board temp = n.getCurrState().getCopy();
-		return temp.getScoreDifference();
-	}
-	
-	public void constructTree(Node node, int depth){
-		if (depth == 0){
-			return;
-		}
-		// player 1
-		if (node.myTurn){
-			for (int i = 0; i<board.numHouses; i++){
-				Board temp = node.getCurrState().getCopy();
-				if (temp.validMove(i)){
-					boolean newTurn = false;
-					if (temp.willHitKalah(i)){
-						newTurn = true;
-					}
-					else if (!temp.willHitKalah(i)){
-						newTurn = false;
-					}
-					temp.moveSeeds(i);
-					if (!temp.gameNotOver()){
-						temp.collectLeftoverSeeds();
-					}
-					Node newMove = new Node(temp);
-					newMove.setMove(i);
-					newMove.myTurn = newTurn;
-					node.addChild(newMove);
-					constructTree(newMove, depth-1);
-				}
-			}
-		}
-		// player 2
-		else if (!node.myTurn){
-			for (int i=board.kalah1()+1; i<board.kalah2(); i++){
-				Board temp = node.getCurrState().getCopy();
-				if (temp.validMove(i)){
-					boolean newTurn = false;
-					if (temp.willHitKalah(i)){
-						newTurn = false;
-					}
-					else if (!temp.willHitKalah(i)){
-						newTurn = true;
-					}
-					temp.moveSeeds(i);
-					if (!temp.gameNotOver()){
-						temp.collectLeftoverSeeds();
-					}
-					Node newMove = new Node(temp);
-					newMove.setMove(i - board.numHouses - 1);
-					newMove.myTurn = newTurn;
-					node.addChild(newMove);
-					constructTree(newMove, depth-1);
-				}
-			}
-		}
-	}
-	
-	public int minimax(Node n, int depth){
-		if (n.isLeaf() || depth == 0){
-			return utilityFunction(n);
-		}
 
-		if (n.myTurn){
-			int temp = min;
-			for (Node e:n.children){
-				e.setAlpha(n.getAlpha());
-				e.setBeta(n.getBeta());
-				int child = minimax(e, depth-1);
-				if (child > temp){
-					temp = child;
-					if (temp > n.getAlpha()){
-						n.setAlpha(temp);
-					}
-				}
-				if (temp >= n.getBeta()){
-					return temp;
-				}
-			}
-			return temp;
-		}
-		else if (!n.myTurn){
-			int temp = max;
-			for (Node e:n.children){
-				e.setAlpha(n.getAlpha());
-				e.setBeta(n.getBeta());
-				int child = minimax(e, depth-1);
-				if (child < temp){
-					temp = child;
-					if (temp < n.getBeta()){
-						n.setBeta(temp);
-					}
-				}
-				if (temp <= n.getAlpha()){
-					return temp;
-				}
-			}
-			return temp;
-		}
-		return -1;
-	}
-		
 	@Override public List<Integer> getMove(){
+		while(!knownTime || OPS_PER_MILLI == 0) Thread.yield();
 		List<Integer> moves = new ArrayList<Integer>();
+		++turn;
 		
-		new Thread(){
-			@Override public void run(){
-				//generate tree, add moves
-				root = new Node(board);
-				root.myTurn = true;
-				constructTree(root, 9);
-				minimax(root, 9);
-				boolean keepGoing = true;
-				while (keepGoing){
-					int index = -1;
-					int alpha = min;
-					int beta = max;
-					if (root.children.size() == 1){
-						moves.add(root.children.get(0).getMove());
-					}
-					else{
-						for (Node e:root.children){
-							//player 1
-							if (root.myTurn){
-								if (e.getAlpha() > alpha){
-									alpha = e.getAlpha();
-									index = root.children.indexOf(e);
-								}
-							}
-							//player 2
-							else if (!root.myTurn){
-								if (e.getBeta() < beta){
-									beta = e.getBeta();
-									index = root.children.indexOf(e);
-								}
-							}
-						}
-						moves.add(root.children.get(index).getMove());
-						if (root.children.get(index).myTurn == root.myTurn){
-							root = root.children.get(index);
-						}
-						else{
-							keepGoing = false;
-							//weHaveTime = false;
-						}
-					}
+		int land, move;
+		do{
+//			System.out.println("Max Depth: "+MAX_DEPTH);
+			moves.add(move = pickBestOption(board, true, turn));
+			land = board.moveSeeds(move);
+		}while(land == board.kalah1() && board.gameNotOver());
+
+		waitingForOpp = true;
+		return moves;
+	}
+
+	@Override public void applyOpponentMove(int move){
+		int land = board.moveSeeds(move);
+		if(waitingForOpp && land != board.kalah2){
+			++turn; waitingForOpp = false;
+		}
+	}
+	
+	@Override public void updateTimer(long timeLeft){
+		long operations = Math.min(OPS_PER_MILLI*timeLeft, OPS_PER_MILLI*5000);
+		MAX_DEPTH = Math.max(1, floorLogBaseX(board.numHouses, operations));
+//		System.out.println("Timer Update, MAX_DEPTH="+MAX_DEPTH);
+		knownTime = true;
+	}
+
+	int pickBestOption(Board state, boolean myTurn, long turn){
+		int bestValue = myTurn ? NINF : INF;
+		int bestMove = -100;
+
+		int land;
+//		long newTurn;
+		boolean newMyTurn;
+		Board newState;
+		
+		for(int move : state.getPossibleMoves(myTurn, turn)){
+			newState = state.getCopy();
+			land = newState.moveSeeds(move);
+			newMyTurn = myTurn ? (land == board.kalah1()) : (land != board.kalah2);
+//			newTurn = (newMyTurn == myTurn) ? turn : turn+1;//Remember, pie rule
+			
+			int value = pickBestValue(newState, 1, newMyTurn, turn+1);
+			if(myTurn){
+				if(value > bestValue){
+					bestValue = value;
+					bestMove = move;
 				}
 			}
-		}.start();
-		return moves;
+			else{
+				if(value < bestValue){
+					bestValue = value;
+					bestMove = move;
+				}
+			}
+		}
+		return bestMove;
+	}
+	
+	int pickBestValue(Board state, int depth, boolean myTurn, long turn){
+		if(depth >= MAX_DEPTH){
+			return state.getScoreDifference();//+board.getSeedDifference()/board.kalah2;
+		}
+		if(!state.gameNotOver()){
+			state.collectLeftoverSeeds();
+			return state.getScoreDifference();
+		}
+
+		int bestValue = myTurn ? NINF : INF;
+
+		++depth;
+		int land;
+//		long newTurn;
+		boolean newMyTurn;
+		Board newState;
+		
+		for(int move : state.getPossibleMoves(myTurn, turn)){
+			newState = state.getCopy();
+			land = newState.moveSeeds(move);
+			newMyTurn = myTurn ? (land == board.kalah1()) : (land != board.kalah2);
+//			newTurn = (newMyTurn == myTurn) ? turn : turn+1;
+			
+			int value = pickBestValue(newState, depth, newMyTurn, turn+1);
+			if(myTurn){
+				if(value > bestValue) bestValue = value;
+			}
+			else{
+				if(value < bestValue) bestValue = value;
+			}
+		}
+		return bestValue;
 	}
 }

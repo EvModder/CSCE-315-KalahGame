@@ -22,58 +22,59 @@ public class DumbAI extends KalahPlayer{
 				}
 			}
 		}
-		int capture = getBestCapture(board.housesAndKalahs);
-		int loop = getBestLoop(board.housesAndKalahs);
+		int capture = getBestCapture(board);
 		if(capture != -1){
 			moves.add(capture);
 			board.moveSeeds(capture);
 		}
-		else if(loop != -1){
-			moves.add(loop);
-			board.moveSeeds(loop);
+		else{
+			int loop = getBestLoop(board);
+			if(loop != -1){
+				moves.add(loop);
+				board.moveSeeds(loop);
+			}
 		}
 		return moves;
 	}
 	
-	static int getBestCapture(int[] board){
-		int numHouses = board.length/2-1;
-		
+	static int getBestCapture(Board board){
 		int max=0,maxI=-1;
-		for(int i=0; i<numHouses; ++i){
-			if(board[i] > board.length-1 || board[i] == 0) continue;
+		for(int i=0; i<board.numHouses; ++i){
+			if(board.housesAndKalahs[i] == 0 || board.housesAndKalahs[i] > board.kalah2) continue;
 			
-			if(board[i] == board.length-1 && board[board.length-2-i]+2 > max){
-				maxI = i;
-				max = board[board.length-2-i]+2;//land=i
-				continue;
+			int capture = board.housesAndKalahs.length-2-i;
+			if(board.housesAndKalahs[i] == board.kalah2){
+				if(board.housesAndKalahs[capture]+2 > max){
+					maxI = i;//land = i
+					max = board.housesAndKalahs[capture]+2;
+				}
 			}
-			
-			int land = i + board[i];
-			int inKalah = 0;
-			
-			if(land >= board.length-1){
-				land -= (board.length-1);
-				++inKalah;
-			}
-			if(land < numHouses && board[land] == 0){
-				inKalah += board[board.length-2-land];	
-				if(inKalah > max){
-					maxI = i;
-					max = inKalah;
+			else{
+				int land = i + board.housesAndKalahs[i];
+				int inKalah = 0;
+				
+				if(land >= board.kalah2){
+					land -= board.kalah2;
+					++inKalah;
+				}
+				if(land < board.numHouses && board.housesAndKalahs[land] == 0){
+					inKalah += board.housesAndKalahs[capture];	
+					if(inKalah > max){
+						maxI = i;
+						max = inKalah;
+					}
 				}
 			}
 		}
 		return maxI;
 	}
 	
-	static int getBestLoop(int[] board){
-		int numHouses = board.length/2-1;
-		
+	static int getBestLoop(Board board){
 		int max=-1,maxI=-1;
-		for(int i=0; i<numHouses; ++i){
-			if(board[i] == 0) continue;
-			int inKalah = (board[i]-1) / (board.length-1);
-			if(i+board[i] >= numHouses) ++inKalah;
+		for(int i=0; i<board.numHouses; ++i){
+			if(board.housesAndKalahs[i] == 0) continue;
+			int inKalah = (board.housesAndKalahs[i]-1) / (board.kalah2);
+			if(i+board.housesAndKalahs[i] >= board.numHouses) ++inKalah;
 			
 			if(inKalah > max){
 				max = inKalah;
