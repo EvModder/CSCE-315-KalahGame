@@ -30,7 +30,7 @@ These settings are used by the server to determine characteristics of a game aga
 * count-leftover-seeds: true
 * last-host: localhost
 
-### AI Options
+### KalahPlayer Options
 There are many AIs (including some min-max AIs) which can be played against. A dropdown menu in the settings window allows the user to select one of the primary AIs from the following list:
 * HumanGUI #Takes imput from GUI
 * HumanConsole #Takes input from console
