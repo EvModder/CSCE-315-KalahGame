@@ -4,7 +4,7 @@ Authors: Andrew Lam, Nathaniel Leake, Tony Huynh
 ## Executables
 The game application comes with a few different JARs (Mains)
 * KalahGame - The primary user inferface, allows a player to join or create a game or edit settings
-* EndlessServer - A server that repeatedly accepts client connections and plays against them using an AI
+* EndlessServer(NonGUI) - A server that repeatedly accepts client connections and plays against them using an AI
 * MultiClientEndlessServer - Same as EndlessServer except can handle up to 100 games simultaneously
 
 ## Configuration
@@ -29,6 +29,7 @@ These settings are used by the server to determine characteristics of a game aga
 * empty-capture: false
 * count-leftover-seeds: true
 * last-host: localhost
+* max-threads: 100
 
 ### KalahPlayer Options
 There are many AIs (including some min-max AIs) which can be played against. A dropdown menu in the settings window allows the user to select one of the primary AIs from the following list:
