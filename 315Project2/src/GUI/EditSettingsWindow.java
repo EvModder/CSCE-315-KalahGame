@@ -51,8 +51,7 @@ public class EditSettingsWindow extends JFrame{
 		//Select a player to play with
 		JLabel playerPickerLabel = new JLabel("Player: "); playerPickerLabel.setFont(font);
 		JComboBox<String> playerPickerBox = new JComboBox<String>(new String[]{
-				"HumanGUI", "HumanConsole", "DumbAI", "DumbJordanAI",
-				"RandomAI", "StrategicAI", "MinMaxAI"
+				"HumanGUI", "HumanConsole", "DumbAI","RandomAI", "StrategicAI", "MinMaxAI"
 		});
 		playerPickerBox.setSelectedItem(settings.getString("AI-name"));
 		JPanel playerPickerPanel = new JPanel();
