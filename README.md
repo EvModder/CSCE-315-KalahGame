@@ -44,3 +44,24 @@ There are many AIs (including some min-max AIs) which can be played against. A d
 * MinMaxAIFinal
 <br /><br />
 So far, MinMaxAIFinal has been the most throughly tested and is recommended for optimal results.
+
+## Additional Features
+### AI
+These are the addiontal features added to the AI
+* Multiple difficulties for AI
+* Alpha-Beta Pruning
+* Iterative Deepening
+* Advanced Utility Function
+
+### GUI
+These are the additional features added to the GUI
+* Custom board and seeds
+* Ability to edit the game
+* Custom grpahics for each window
+* Dynamic timer on board
+* Ability to edit any setting for the game
+
+### Client/Server
+There are the additional features added to the Client/Server
+* Can connect multiple clients
+* Keeps track of last server successfully connected to
