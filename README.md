@@ -52,6 +52,8 @@ These are the addiontal features added to the AI
 * Alpha-Beta Pruning
 * Iterative Deepening
 * Advanced Utility Function
+* Mutli-threading
+* Branch ordering (explores favorable branches sooner)
 
 ### GUI
 These are the additional features added to the GUI
@@ -59,9 +61,12 @@ These are the additional features added to the GUI
 * Ability to edit the game
 * Custom grpahics for each window
 * Dynamic timer on board
-* Ability to edit any setting for the game
+* GUI Window to edit any setting for the game
+* Automatically loads and saves settings to a easily configurable file 
+* Can play the game using either a GUI or a console
 
 ### Client/Server
 There are the additional features added to the Client/Server
+* Can run both the client and the server from the same program
 * Can connect multiple clients
 * Keeps track of last server successfully connected to
