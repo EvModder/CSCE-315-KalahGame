@@ -1,6 +1,5 @@
 # CSCE-315-Project2 <br />
-Primary Author: Nathaniel Leake
-Assistants: Tony Huynh, Andrew Lam
+Nathaniel Leake
 
 ## Executables
 The game application comes with a few different JARs (Mains)
