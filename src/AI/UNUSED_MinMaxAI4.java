@@ -62,15 +62,15 @@ public class UNUSED_MinMaxAI4 extends KalahPlayer{
 		
 		List<Integer> moves = state.getPossibleMoves(myTurn, pieTurn);
 		ExecutorService pool = Executors.newFixedThreadPool(moves.size());
-		int[] values = new int[moves.size()];
+		final int[] values = new int[moves.size()];
 		
 		int idx = -1;
 		for(int move : moves){
-			Board newState = state.getCopy();
+			final Board newState = state.getCopy();
 			int land = newState.moveSeeds(move);
-			boolean newMyTurn = myTurn ? (land == state.kalah1()) : (land != state.kalah2);
-			long newPieTurn = (newMyTurn != myTurn || pieTurn == 2) ? pieTurn+1 : pieTurn;
-			int index = ++idx;
+			final boolean newMyTurn = myTurn ? (land == state.kalah1()) : (land != state.kalah2);
+			final long newPieTurn = (newMyTurn != myTurn || pieTurn == 2) ? pieTurn+1 : pieTurn;
+			final int index = ++idx;
 			
 			pool.execute(new Runnable(){@Override public void run(){
 				values[index] = pickBestValue(newState, 1, newMyTurn, newPieTurn, NINF, INF);

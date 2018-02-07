@@ -10,7 +10,7 @@ import Main.Board;
  * Uses recursive function calls instead of a tree of nodes to avoid
  * the slow down from the Java garbage collector.
  */
-public class MinMaxAI extends KalahPlayer{
+public class MinMaxAI_WeirdPruning extends KalahPlayer{
 	long FUNCTION_SPEED, lastTime, timeLimit, timerStart, timerTime;
 	int MAX_DEPTH, pieTurn=1, BUFFER =300;
 
@@ -32,7 +32,7 @@ public class MinMaxAI extends KalahPlayer{
 		return n;
 	}
 
-	public MinMaxAI(final Board board){
+	public MinMaxAI_WeirdPruning(final Board board){
 		super(board);
 		
 		//Calculate approximate number of operations this computer can do in a millisecond
@@ -120,14 +120,14 @@ public class MinMaxAI extends KalahPlayer{
 			newState = state.getCopy();
 			
 			if(newState.moveSeeds(move) == state.kalah1()){
-				value = pickHighestValue(newState, 1, (pieTurn == 2) ? 3 : pieTurn);
+				value = pickHighestValue(newState, 1, (pieTurn == 2) ? 3 : pieTurn, WIN);
 				if(value > bestValue){
 					bestValue = value;
 					bestMove = move;
 				}
 			}
 			else{
-				value = pickLowestValue(newState, 1, (pieTurn == 3) ? 3 : pieTurn+1);
+				value = pickLowestValue(newState, 1, (pieTurn == 3) ? 3 : pieTurn+1, LOSE);
 				if(value < bestValue){
 					bestValue = value;
 					bestMove = move;
@@ -150,12 +150,12 @@ public class MinMaxAI extends KalahPlayer{
 			
 			if(newState.moveSeeds(move) == state.kalah1()){
 				pool.execute(new Runnable(){@Override public void run(){
-					values[index] = pickHighestValue(newState, 1, (pieTurn == 2) ? 3 : pieTurn);
+					values[index] = pickHighestValue(newState, 1, (pieTurn == 2) ? 3 : pieTurn, WIN);
 				}});
 			}
 			else{
 				pool.execute(new Runnable(){@Override public void run(){
-					values[index] = pickLowestValue(newState, 1, (pieTurn == 3) ? 3 : pieTurn+1);
+					values[index] = pickLowestValue(newState, 1, (pieTurn == 3) ? 3 : pieTurn+1, LOSE);
 				}});
 			}
 		}
@@ -187,7 +187,7 @@ public class MinMaxAI extends KalahPlayer{
 	
 	int WIN = Integer.MAX_VALUE-1, LOSE = Integer.MIN_VALUE+1, WILL_WIN = WIN/4, WILL_LOSE = LOSE/4;
 //	int WILL_SCUNK = WILL_WIN*2;
-	int pickHighestValue(Board state, int depth, int pieTurn){
+	int pickHighestValue(Board state, int depth, int pieTurn, int beta){
 		if(state.gameOver()){
 			int score = state.getFinalScoreDifference();
 //			return score > 0 ? WIN : (diff == 0 ? 0 : LOSE);
@@ -204,17 +204,18 @@ public class MinMaxAI extends KalahPlayer{
 		++depth;
 		Board newState;
 		int pieHigh = (pieTurn == 2) ? 3 : pieTurn, pieLow = (pieTurn == 3) ? 3 : pieTurn+1;
-		
+
 		for(int move : state.getPossibleMovesOrdered(true, pieTurn)){
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.numHouses){
-				value = pickHighestValue(newState, depth, pieHigh);
+				value = pickHighestValue(newState, depth, pieHigh, beta);
 			}
 			else{
-				value = pickLowestValue(newState, depth, pieLow);
+				value = pickLowestValue(newState, depth, pieLow, bestValue/2);
 			}
 			if(value > bestValue){
+				if(value > beta) return value;
 				//Comment out the MAGIC_LINEs for a more glorious but less likely win
 //				if(value > board.seedsToTie) return value;//MAGIC_LINE
 				bestValue = value;
@@ -223,7 +224,7 @@ public class MinMaxAI extends KalahPlayer{
 		return bestValue;
 	}
 	
-	int pickLowestValue(Board state, int depth, int pieTurn){
+	int pickLowestValue(Board state, int depth, int pieTurn, int alpha){
 		if(state.gameOver()){
 			int score = state.getFinalScoreDifference();
 			return score + (score > 0 ? WILL_WIN : WILL_LOSE);
@@ -242,12 +243,13 @@ public class MinMaxAI extends KalahPlayer{
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.kalah2){
-				value = pickLowestValue(newState, depth, pieLow);
+				value = pickLowestValue(newState, depth, pieLow, alpha);
 			}
 			else{
-				value = pickHighestValue(newState, depth, pieHigh);
+				value = pickHighestValue(newState, depth, pieHigh, worstValue/2);
 			}
 			if(value < worstValue){
+				if(value < alpha) return value;
 				//Comment out the MAGIC_LINEs for a more glorious but less likely win
 //				if(value < board.seedsToTie) return value;//MAGIC_LINE
 				worstValue = value;

@@ -9,10 +9,10 @@ public class MoveTimer {
 		void timeElapsed(long time);
 	}
 	
-	public void startTimer(TimerListener listener, long timelimit){
+	public void startTimer(final TimerListener listener, long timelimit){
 		while(thread != null && thread.isAlive()) Thread.yield();
 		
-		long end = System.currentTimeMillis()+timelimit;
+		final long end = System.currentTimeMillis()+timelimit;
 		alive = true;
 		thread = new Thread(){
 			@Override public void run(){

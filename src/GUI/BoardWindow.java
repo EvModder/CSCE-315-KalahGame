@@ -20,13 +20,12 @@ public class BoardWindow extends JFrame{
 	Integer boardMove;
 
 	public BoardWindow(int[] board){
-		JPanel player1Houses = new JPanel(new GridLayout());
-		JPanel player2Houses = new JPanel(new GridLayout());
-		
+		JPanel player1Houses = new JPanel(new GridLayout()), player2Houses = new JPanel(new GridLayout());
+
 		boardSquares = new HouseButton[board.length];
-		
-		int kalah1 = board.length/2-1, kalah2 = board.length-1;
-		
+
+		final int kalah1 = board.length/2-1, kalah2 = board.length-1;
+
 		String imgName = new Settings().getString("button-image").toLowerCase();
 		ImageIcon player1Img, player2Img;
 		if(imgName.equals("awesome")){
@@ -36,7 +35,7 @@ public class BoardWindow extends JFrame{
 		else{
 			player1Img = player2Img = new ImageIcon(getClass().getResource("/images/"+imgName+".png"));
 		}
-		
+
 		//add houses
 		for(int i=0; i<kalah1; ++i){
 			player1Houses.add(boardSquares[i] = new HouseButton(this, i, board[i], player1Img));

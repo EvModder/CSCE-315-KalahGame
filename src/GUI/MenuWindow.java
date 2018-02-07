@@ -29,7 +29,7 @@ public class MenuWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 	Settings settings;
 
-	MenuWindow(GUIManager guiHandler){
+	MenuWindow(final GUIManager guiHandler){
 		settings = new Settings();
 		setTitle("Ultimate Kalah");
 		setIconImage(GUIManager.icon);

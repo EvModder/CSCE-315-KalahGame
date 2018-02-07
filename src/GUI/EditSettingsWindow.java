@@ -22,7 +22,7 @@ public class EditSettingsWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 
 	//A window that allows the user to edit settings defined in the settings.yml file
-	EditSettingsWindow(MenuWindow menuWindow, Settings settings){
+	EditSettingsWindow(final MenuWindow menuWindow, final Settings settings){
 		setTitle("Edit Settings");
 		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -31,18 +31,18 @@ public class EditSettingsWindow extends JFrame{
 		Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 16);
 		
 		JLabel housesLabel = new JLabel("Houses per Side: "); housesLabel.setFont(font);
-		JTextField chooseHouses = new JTextField(settings.getString("holes-per-side"), 3);
+		final JTextField chooseHouses = new JTextField(settings.getString("holes-per-side"), 3);
 		JPanel housesPanel = new JPanel();
 		housesPanel.add(housesLabel); housesPanel.add(chooseHouses);
 		housesPanel.setOpaque(false);
 		JLabel seedsLabel = new JLabel("Seeds per House: "); seedsLabel.setFont(font);
-		JTextField chooseSeeds = new JTextField(settings.getString("seeds-per-hole"), 3);
+		final JTextField chooseSeeds = new JTextField(settings.getString("seeds-per-hole"), 3);
 		JPanel seedsPanel = new JPanel();
 		seedsPanel.add(seedsLabel); seedsPanel.add(chooseSeeds);
 		seedsPanel.setOpaque(false);
 		
 		JLabel gameTypeLabel = new JLabel("Type of Game: "); gameTypeLabel.setFont(font);
-		JComboBox<String> gameTypeBox = new JComboBox<String>(new String[]{"S","R","C"});
+		final JComboBox<String> gameTypeBox = new JComboBox<String>(new String[]{"S","R","C"});
 		gameTypeBox.setSelectedItem(settings.getString("game-type"));
 		JPanel gameTypePanel = new JPanel();
 		gameTypePanel.add(gameTypeLabel); gameTypePanel.add(gameTypeBox);
@@ -50,8 +50,9 @@ public class EditSettingsWindow extends JFrame{
 		
 		//Select a player to play with
 		JLabel playerPickerLabel = new JLabel("Player: "); playerPickerLabel.setFont(font);
-		JComboBox<String> playerPickerBox = new JComboBox<String>(new String[]{
-				"HumanGUI", "HumanConsole", "DumbAI","RandomAI", "StrategicAI", "MinMaxAI"
+		final JComboBox<String> playerPickerBox = new JComboBox<String>(new String[]{
+				"HumanGUI", "HumanConsole", "DumbAI","RandomAI", "StrategicAI", "MinMaxAI",
+				"MinMaxAI_WeirdPruning"
 		});
 		playerPickerBox.setSelectedItem(settings.getString("AI-name"));
 		JPanel playerPickerPanel = new JPanel();
@@ -59,7 +60,7 @@ public class EditSettingsWindow extends JFrame{
 		playerPickerPanel.setOpaque(false);
 		
 		JLabel useGuiLabel = new JLabel("Use GUI: "); useGuiLabel.setFont(font);
-		JButton useGuiButton = new JButton(settings.getBoolean("use-GUI") ? "Yes" : "No");
+		final JButton useGuiButton = new JButton(settings.getBoolean("use-GUI") ? "Yes" : "No");
 		useGuiButton.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent e){
 				if(useGuiButton.getText().equals("No")){
@@ -77,13 +78,13 @@ public class EditSettingsWindow extends JFrame{
 		useGuiPanel.setOpaque(false);
 		
 		JLabel timeLimitLabel = new JLabel("Move time-limit: "); timeLimitLabel.setFont(font);
-		JTextField timeLimit = new JTextField(settings.getString("time-limit"), 4);
+		final JTextField timeLimit = new JTextField(settings.getString("time-limit"), 4);
 		JPanel timeLimitPanel = new JPanel();
 		timeLimitPanel.add(timeLimitLabel); timeLimitPanel.add(timeLimit);
 		timeLimitPanel.setOpaque(false);
 		
 		JLabel startingPlayerLabel = new JLabel("Starting Player: "); startingPlayerLabel.setFont(font);
-		JButton startingPlayer = new JButton(settings.getString("starting-player").equals("S") ? "Me" : "Opp");
+		final JButton startingPlayer = new JButton(settings.getString("starting-player").equals("S") ? "Me" : "Opp");
 		startingPlayer.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent e){
 				if(startingPlayer.getText().equals("Me")){
@@ -101,7 +102,7 @@ public class EditSettingsWindow extends JFrame{
 		startingPlayerPanel.setOpaque(false);
 		
 		JLabel useBEGINLabel = new JLabel("Use 'BEGIN': "); useBEGINLabel.setFont(font);
-		JButton useBEGIN = new JButton(settings.getBoolean("use-BEGIN") ? "Yes" : "No");
+		final JButton useBEGIN = new JButton(settings.getBoolean("use-BEGIN") ? "Yes" : "No");
 		useBEGIN.addActionListener(new ActionListener(){
 			@Override public void actionPerformed(ActionEvent e){
 				if(useBEGIN.getText().equals("No")){
@@ -126,7 +127,7 @@ public class EditSettingsWindow extends JFrame{
 		customBoardPanel.setOpaque(false);
 		
 		JLabel pickButtonLabel = new JLabel("Button Image: "); pickButtonLabel.setFont(font);
-		JComboBox<String> pickButton = new JComboBox<String>(new String[]{
+		final JComboBox<String> pickButton = new JComboBox<String>(new String[]{
 				"Hexagon", "Square", "Circle", "Awesome"
 		});
 		pickButton.setSelectedItem(settings.getString("button-image"));

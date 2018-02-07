@@ -21,7 +21,7 @@ public class ServerSide extends Connection{
 		return socket == null || socket.isClosed() || clientSocket == null || clientSocket.isClosed();
 	}
 	
-	public ServerSide(MessageReceiver rec, Settings settings){
+	public ServerSide(final MessageReceiver rec, Settings settings){
 		super(rec);
 		//Open a server port & wait for a client to join
 		try{socket = new ServerSocket(settings.getInt("port"));}

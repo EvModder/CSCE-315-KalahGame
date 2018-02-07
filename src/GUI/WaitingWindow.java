@@ -16,7 +16,7 @@ class WaitingWindow extends JFrame{
 		setTitle("Waiting to start");
 		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JLabel waitingLabel = new JLabel("Waiting for opponent", SwingConstants.CENTER);
+		final JLabel waitingLabel = new JLabel("Waiting for opponent", SwingConstants.CENTER);
 		setSize(300, 100);
 		add(waitingLabel);
 		setLocationRelativeTo(null);

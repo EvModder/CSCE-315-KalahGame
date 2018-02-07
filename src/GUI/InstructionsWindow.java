@@ -13,7 +13,7 @@ import javax.swing.WindowConstants;
 public class InstructionsWindow extends JFrame{
 	private static final long serialVersionUID = 1L;
 
-	InstructionsWindow(MenuWindow menuWindow){
+	InstructionsWindow(final MenuWindow menuWindow){
 		setTitle("Kalah Instructions");
 		setIconImage(GUIManager.icon);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

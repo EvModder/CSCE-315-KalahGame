@@ -25,7 +25,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	public KalahGame(GUIManager handler, Settings settings){
 		this(handler, settings, null);
 	}
-	public KalahGame(GUIManager handler, Settings settings, Connection conn){
+	public KalahGame(final GUIManager handler, final Settings settings, Connection conn){
 		guiHandler = handler;
 		this.settings = settings;
 		isServer = settings.getBoolean("is-server");

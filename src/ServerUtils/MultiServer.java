@@ -58,7 +58,7 @@ public class MultiServer{
 		}
 	}
 	
-	public MultiServer(ConnectionReceiver connRec){
+	public MultiServer(final ConnectionReceiver connRec){
 		receiver = connRec;
 		try{socket = new ServerSocket(port);}
 		catch(IOException e){e.printStackTrace();return;}

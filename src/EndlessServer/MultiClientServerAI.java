@@ -23,7 +23,7 @@ class MultiClientServerAI implements ConnectionReceiver{
 	}
 
 	@Override
-	public void gotConnection(Connection connection){
+	public void gotConnection(final Connection connection){
 		new Thread(){@Override public void run(){
 			settings.set("use-GUI", false);
 			settings.set("is-server", true);
