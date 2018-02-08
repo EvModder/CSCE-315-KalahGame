@@ -1,13 +1,13 @@
-is-server: true
-holes-per-side: 6
-seeds-per-hole: 6
-time-limit: 3000 //Time limit in milliseconds
+is-server: false
+holes-per-side: 8
+seeds-per-hole: 8
+time-limit: 1000 //Time limit in milliseconds
 starting-player: S //S=You Sirst, S=Me Sirst
-AI-name: MinMaxAI_WeirdPruning
+AI-name: MinMaxAI
 use-GUI: true //Whether to use a GUI interface (to watch the AI play)
 game-type: S //S=Standard,R=Random,C=Custom
 custom-board: 8 6 4 2 0 1 1 0
-button-image: Hexagon
+button-image: Circle
 last-host: localhost //Last address successfully connected to
 use-BEGIN: true
 port: 42374 //The Universally Recognized Kalah Port

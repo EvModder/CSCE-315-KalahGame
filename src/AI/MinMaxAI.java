@@ -52,15 +52,14 @@ public class MinMaxAI extends KalahPlayer{
 		while(FUNCTION_SPEED == 0)Thread.yield();
 		MAX_DEPTH = 0;
 		while(MAX_DEPTH == 0) Thread.yield();
-		
+
 		//List of moves we are going to return
 		List<Integer> moves = new ArrayList<Integer>();
-		
+
 		//Keep moving for as long as we hit our Kalah
 		int move, land = board.kalah1();
 		while(land == board.kalah1() && board.gameNotOver()){
-			
-			
+
 			//Time how long it takes to get a move using the MinMax
 			timerStart = System.currentTimeMillis();
 //			System.out.println("Attempting: "+MAX_DEPTH);
@@ -68,17 +67,17 @@ public class MinMaxAI extends KalahPlayer{
 					pickBestOptionThreaded(board, pieTurn) : pickBestOption(board, pieTurn);
 			timerTime = System.currentTimeMillis() - timerStart + 1;
 //			System.out.println("Actual: "+MAX_DEPTH);
-			
-			
+
 			//Re-calculate running average of number of functions per millisecond
 			long newSpeed = pow(board.numHouses, MAX_DEPTH)/timerTime;
 			FUNCTION_SPEED = (long)(.93*FUNCTION_SPEED + .07*newSpeed);
-			
+
 			land = board.moveSeeds(move);
 			moves.add(move);
 			if(pieTurn == 2) pieTurn = 3;
 		}
 		if(pieTurn == 1) pieTurn = 2;
+		System.out.println("--------- Depth: "+MAX_DEPTH);
 		return moves;
 	}
 
@@ -112,8 +111,8 @@ public class MinMaxAI extends KalahPlayer{
 	
 	//Find the best move given the current board state
 	int pickBestOption(Board state, int pieTurn){
-		List<Integer> moves = state.getPossibleMovesOrdered(true, pieTurn);
-		int bestValue = Integer.MIN_VALUE, bestMove = moves.get(0), value;
+		int[] moves = state.getPossibleMovesOrderedArray(true, pieTurn);
+		int bestValue = Integer.MIN_VALUE, bestMove = moves[0], value;
 		Board newState;
 		
 		for(int move : moves){
@@ -138,10 +137,10 @@ public class MinMaxAI extends KalahPlayer{
 	}
 	
 	int pickBestOptionThreaded(Board state, final int pieTurn){
-		List<Integer> moves = state.getPossibleMovesOrdered(true, pieTurn);
-		int bestValue = Integer.MIN_VALUE, bestMove = moves.get(0);
-		ExecutorService pool = Executors.newFixedThreadPool(Math.min(moves.size(), 100));
-		final int[] values = new int[moves.size()];
+		int[] moves = state.getPossibleMovesOrderedArray(true, pieTurn);
+		int bestValue = Integer.MIN_VALUE, bestMove = moves[0];
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(moves.length, 100));
+		final int[] values = new int[moves.length];
 		int i=-1;
 		
 		for(int move : moves){
@@ -164,7 +163,7 @@ public class MinMaxAI extends KalahPlayer{
 		for(i=0; i<values.length; ++i){
 			if(values[i] > bestValue){
 				bestValue = values[i];
-				bestMove = moves.get(i);
+				bestMove = moves[i];
 			}
 		}
 		return bestMove;
@@ -182,7 +181,9 @@ public class MinMaxAI extends KalahPlayer{
 		}
 //		return state.getScoreDifference() + ((myVal - urVal)>>1) + (mySeeds - urSeeds)/board.kalah2;
 //		return state.getScoreDifference() + (((myVal - urVal)<<1) + (mySeeds - urSeeds))/board.numHouses;
-		return state.getScoreDifference() + ((myVal - urVal)>>1) + (mySeeds - urSeeds) / (Math.min(mySeeds, urSeeds)>>1);
+		if(urSeeds == mySeeds) return state.getScoreDifference() + ((myVal - urVal)>>1);
+		else return state.getScoreDifference() + ((myVal - urVal)>>1)
+				+ ((mySeeds - urSeeds)<<1) / Math.min(mySeeds, urSeeds);
 	}
 	
 	int WIN = Integer.MAX_VALUE-1, LOSE = Integer.MIN_VALUE+1, WILL_WIN = WIN/4, WILL_LOSE = LOSE/4;
@@ -205,7 +206,7 @@ public class MinMaxAI extends KalahPlayer{
 		Board newState;
 		int pieHigh = (pieTurn == 2) ? 3 : pieTurn, pieLow = (pieTurn == 3) ? 3 : pieTurn+1;
 		
-		for(int move : state.getPossibleMovesOrdered(true, pieTurn)){
+		for(int move : state.getPossibleMovesOrderedArray(true, pieTurn)){
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.numHouses){
@@ -238,7 +239,7 @@ public class MinMaxAI extends KalahPlayer{
 		Board newState;
 		int pieLow = (pieTurn == 2) ? 3 : pieTurn, pieHigh = (pieTurn == 3) ? 3 : pieTurn+1;
 		
-		for(int move : state.getPossibleMovesOrdered(false, pieTurn)){
+		for(int move : state.getPossibleMovesOrderedArray(false, pieTurn)){
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.kalah2){

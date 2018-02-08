@@ -12,7 +12,7 @@ import Main.Board;
  */
 public class MinMaxAI_WeirdPruning extends KalahPlayer{
 	long FUNCTION_SPEED, lastTime, timeLimit, timerStart, timerTime;
-	int MAX_DEPTH, pieTurn=1, BUFFER =300;
+	int MAX_DEPTH, pieTurn=1, BUFFER = 500;
 
 	//Calculate floor(log_x(val))
 	int floorLogBaseX(int x, long val){
@@ -24,7 +24,7 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		}
 		return count;
 	}
-	
+
 	//Calculate b^p
 	long pow(long b, int p){
 		long n = 1;
@@ -46,21 +46,20 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 			FUNCTION_SPEED = 5*pow(board.numHouses, MAX_DEPTH)/timerTime;
 		}}.start();
 	}
-	
+
 	@Override public List<Integer> getMove(){
 		//Wait for variables to be defined (prevent race-condition)
-		while(FUNCTION_SPEED == 0)Thread.yield();
+		while(FUNCTION_SPEED == 0) Thread.yield();
 		MAX_DEPTH = 0;
 		while(MAX_DEPTH == 0) Thread.yield();
-		
+
 		//List of moves we are going to return
 		List<Integer> moves = new ArrayList<Integer>();
-		
+
 		//Keep moving for as long as we hit our Kalah
 		int move, land = board.kalah1();
 		while(land == board.kalah1() && board.gameNotOver()){
-			
-			
+
 			//Time how long it takes to get a move using the MinMax
 			timerStart = System.currentTimeMillis();
 //			System.out.println("Attempting: "+MAX_DEPTH);
@@ -68,17 +67,18 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 					pickBestOptionThreaded(board, pieTurn) : pickBestOption(board, pieTurn);
 			timerTime = System.currentTimeMillis() - timerStart + 1;
 //			System.out.println("Actual: "+MAX_DEPTH);
-			
-			
+
+
 			//Re-calculate running average of number of functions per millisecond
 			long newSpeed = pow(board.numHouses, MAX_DEPTH)/timerTime;
-			FUNCTION_SPEED = (long)(.93*FUNCTION_SPEED + .07*newSpeed);
-			
+			FUNCTION_SPEED = (long)(.9*FUNCTION_SPEED + .1*newSpeed);
+
 			land = board.moveSeeds(move);
 			moves.add(move);
 			if(pieTurn == 2) pieTurn = 3;
 		}
 		if(pieTurn == 1) pieTurn = 2;
+		System.out.println("--------- DepthPruning: "+MAX_DEPTH);
 		return moves;
 	}
 
@@ -87,33 +87,33 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 			++pieTurn;
 		}
 	}
-	
+
 	//Update from the MoveTimer class to let us know how much time we have lefts
 	@Override public void updateTimer(long timeLeft){
 		lastTime = timeLeft;
 		if(timeLeft > timeLimit){
+			//We are redefining the time limit on a move
 			timeLimit = timeLeft;
-			BUFFER = (int)Math.min(timeLimit/4, BUFFER);
+			//Use at least 3/4 of the move time, even in tight pinches
+			if((timeLimit>>2) < BUFFER) BUFFER = (int)(timeLimit>>2);
 		}
 
 		if(FUNCTION_SPEED != 0){
 			//BUFFER so this returns some number of milliseconds earlier than needed
 			timeLeft -= BUFFER;//(Helps account for network lag)
-			
-			if(timeLeft > 64){
-				timeLeft *= (timeLeft>>5);
-			}
-			
+
+			if(timeLeft > 64) timeLeft *= (timeLeft>>4);
+
 			MAX_DEPTH = floorLogBaseX(board.numHouses, FUNCTION_SPEED*timeLeft);
 //			System.out.println("New MAX_DEPTH: "+MAX_DEPTH);
 		}
 		if(MAX_DEPTH < 1) MAX_DEPTH = 1;
 	}
-	
+
 	//Find the best move given the current board state
 	int pickBestOption(Board state, int pieTurn){
-		List<Integer> moves = state.getPossibleMovesOrdered(true, pieTurn);
-		int bestValue = Integer.MIN_VALUE, bestMove = moves.get(0), value;
+		int[] moves = state.getPossibleMovesOrderedArray(true, pieTurn);
+		int bestValue = Integer.MIN_VALUE, bestMove = moves[0], value;
 		Board newState;
 		
 		for(int move : moves){
@@ -138,10 +138,10 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 	}
 	
 	int pickBestOptionThreaded(Board state, final int pieTurn){
-		List<Integer> moves = state.getPossibleMovesOrdered(true, pieTurn);
-		int bestValue = Integer.MIN_VALUE, bestMove = moves.get(0);
-		ExecutorService pool = Executors.newFixedThreadPool(Math.min(moves.size(), 100));
-		final int[] values = new int[moves.size()];
+		int[] moves = state.getPossibleMovesOrderedArray(true, pieTurn);
+		int bestValue = Integer.MIN_VALUE, bestMove = moves[0];
+		ExecutorService pool = Executors.newFixedThreadPool(Math.min(moves.length, 100));
+		final int[] values = new int[moves.length];
 		int i=-1;
 		
 		for(int move : moves){
@@ -164,12 +164,12 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		for(i=0; i<values.length; ++i){
 			if(values[i] > bestValue){
 				bestValue = values[i];
-				bestMove = moves.get(i);
+				bestMove = moves[i];
 			}
 		}
 		return bestMove;
 	}
-	
+
 	int getUtility(Board state){
 		int mySeeds=0,myVal=0, urSeeds=0,urVal=0;
 		for(int i=0; i<board.numHouses; ++i){
@@ -182,9 +182,11 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		}
 //		return state.getScoreDifference() + ((myVal - urVal)>>1) + (mySeeds - urSeeds)/board.kalah2;
 //		return state.getScoreDifference() + (((myVal - urVal)<<1) + (mySeeds - urSeeds))/board.numHouses;
-		return state.getScoreDifference() + ((myVal - urVal)>>1) + (mySeeds - urSeeds) / (Math.min(mySeeds, urSeeds)>>1);
+		if(urSeeds == mySeeds) return state.getScoreDifference() + ((myVal - urVal)>>1);
+		else return state.getScoreDifference() + ((myVal - urVal)>>1)
+				+ ((mySeeds - urSeeds)<<1) / Math.min(mySeeds, urSeeds);
 	}
-	
+
 	int WIN = Integer.MAX_VALUE-1, LOSE = Integer.MIN_VALUE+1, WILL_WIN = WIN/4, WILL_LOSE = LOSE/4;
 //	int WILL_SCUNK = WILL_WIN*2;
 	int pickHighestValue(Board state, int depth, int pieTurn, int beta){
@@ -205,7 +207,7 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		Board newState;
 		int pieHigh = (pieTurn == 2) ? 3 : pieTurn, pieLow = (pieTurn == 3) ? 3 : pieTurn+1;
 
-		for(int move : state.getPossibleMovesOrdered(true, pieTurn)){
+		for(int move : state.getPossibleMovesOrderedArray(true, pieTurn)){
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.numHouses){
@@ -223,7 +225,7 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		}
 		return bestValue;
 	}
-	
+
 	int pickLowestValue(Board state, int depth, int pieTurn, int alpha){
 		if(state.gameOver()){
 			int score = state.getFinalScoreDifference();
@@ -239,7 +241,7 @@ public class MinMaxAI_WeirdPruning extends KalahPlayer{
 		Board newState;
 		int pieLow = (pieTurn == 2) ? 3 : pieTurn, pieHigh = (pieTurn == 3) ? 3 : pieTurn+1;
 		
-		for(int move : state.getPossibleMovesOrdered(false, pieTurn)){
+		for(int move : state.getPossibleMovesOrderedArray(false, pieTurn)){
 			newState = state.getCopy();
 			int value;
 			if(newState.moveSeeds(move) == board.kalah2){

@@ -277,7 +277,7 @@ public class Board {
 	}
 	
 	//Return a list of moves in an order corresponding to their approximate value
-	public List<Integer> getPossibleMovesOrdered(boolean player1, int turn){
+	public LinkedList<Integer> getPossibleMovesOrdered(boolean player1, int turn){
 		int s,e;
 		if(player1){s=0; e=numHouses;}
 		else{s=house02; e=kalah2;}
@@ -290,6 +290,34 @@ public class Board {
 		for(int i=s; i<e; ++i) if(housesAndKalahs[i] != 0){
 			if(willHitKalah(i)) moves.addFirst(i);
 			else moves.addLast(i);
+		}
+		return moves;
+	}
+
+	//Return an array of moves in an order corresponding to their approximate value
+	public int[] getPossibleMovesOrderedArray(boolean player1, int turn){
+		int s,e;
+		if(player1){s=0; e=numHouses;}
+		else{s=house02; e=kalah2;}
+
+		int head=-1, tail=0;
+		int[] moves;
+		if(turn == 2){
+			moves = new int[numHouses+1];
+			moves[0] = -1;
+			++head;
+			tail = 1;
+		}
+		else moves = new int[numHouses];
+
+		for(int i=s; i<e; ++i) if(housesAndKalahs[i] != 0){
+			if(captureValue(i) != 0) moves[++head] = i;
+			++tail;
+		}
+		if(tail != moves.length) moves = Arrays.copyOf(moves, tail);
+
+		for(int i=s; i<e; ++i) if(housesAndKalahs[i] != 0){
+			moves[willHitKalah(i) ? ++head : --tail] = i;
 		}
 		return moves;
 	}

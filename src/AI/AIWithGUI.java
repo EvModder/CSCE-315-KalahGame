@@ -1,7 +1,6 @@
 package AI;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import GUI.BoardWindow;
 import Main.Board;
 
@@ -13,7 +12,7 @@ public class AIWithGUI extends KalahPlayer {
 	BoardWindow boardFrame;
 	KalahPlayer ai;
 	
-	public AIWithGUI(Board board, Class<?> clazz) {
+	public AIWithGUI(Board board, Class<?> clazz){
 		super(board);
 		
 		//Reflection to get an AI class object given a AI class name as a string

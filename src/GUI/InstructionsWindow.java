@@ -62,7 +62,7 @@ public class InstructionsWindow extends JFrame{
 		setLayout(new BorderLayout());
 		add(menuButton, BorderLayout.NORTH);
 		add(label);
-		setLocationRelativeTo(null);
+		setLocationRelativeTo(menuWindow);
 		setVisible(true);
 	}
 }

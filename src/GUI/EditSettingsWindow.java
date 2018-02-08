@@ -211,7 +211,7 @@ public class EditSettingsWindow extends JFrame{
 		add(menuButton, BorderLayout.NORTH);
 		add(panel);
 		setMinimumSize(new Dimension(200, 80));
-		setLocationRelativeTo(null);
+		setLocationRelativeTo(menuWindow);
 		setVisible(true);
 	}
 }

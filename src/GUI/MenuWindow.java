@@ -91,8 +91,8 @@ public class MenuWindow extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				if(MenuWindow.this.isVisible()){
 					System.out.println("Instructions button pressed");
-					MenuWindow.this.setVisible(false);
 					new InstructionsWindow(MenuWindow.this);
+					MenuWindow.this.setVisible(false);
 				}
 			}
 		});
@@ -111,9 +111,9 @@ public class MenuWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(MenuWindow.this.isVisible()){
-					MenuWindow.this.setVisible(false);
 					System.out.println("Edit Settings button pressed");
 					new EditSettingsWindow(MenuWindow.this, settings);
+					MenuWindow.this.setVisible(false);
 				}
 			}
 		});
