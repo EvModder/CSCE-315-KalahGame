@@ -1,12 +1,12 @@
 package EndlessServer;
 import java.util.Random;
-
 import GUI.NotGUIManager;
 import Main.KalahGame;
 import Main.Settings;
 
 class EndlessServer{
-	/* An infinite server that waits for a client, plays against it using an,
+	/*
+	 * An infinite server that waits for a client, plays against it using an,
 	 * AI, and then closes the game and starts waiting for the next client
 	 */
 	public static void main(String... args){
@@ -16,7 +16,7 @@ class EndlessServer{
 		settings.set("AI-name", "MinMaxAI");
 		settings.set("use-GUI", false);
 		settings.set("is-server", true);
-		
+
 		while(true){
 			//Randomize settings
 			settings.set("holes-per-side", rand.nextInt(10)+3);
@@ -24,7 +24,7 @@ class EndlessServer{
 			settings.set("time-limit", rand.nextInt(8000)+800);
 			settings.set("starting-player", rand.nextBoolean() ? "S" : "F");
 			settings.set("game-type", rand.nextBoolean() ? "S" : "R");
-//			
+
 			//Start a new game
 			game = new KalahGame(new NotGUIManager(), settings);
 			while(!game.isGameOver()) Thread.yield();

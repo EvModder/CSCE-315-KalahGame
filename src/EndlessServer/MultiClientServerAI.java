@@ -16,7 +16,7 @@ class MultiClientServerAI implements ConnectionReceiver{
 	Random rand = new Random();
 	MultiClientServerWindow gui;
 	Settings settings = new Settings();
-	
+
 	MultiClientServerAI(){
 		gui = new MultiClientServerWindow();
 		new MultiServer(this);
@@ -28,7 +28,7 @@ class MultiClientServerAI implements ConnectionReceiver{
 			settings.set("use-GUI", false);
 			settings.set("is-server", true);
 			settings.set("AI-name", "MinMaxAI");
-			
+
 			//Randomize settings
 			settings.set("holes-per-side", rand.nextInt(10)+3);
 			settings.set("seeds-per-hole", rand.nextInt(16)+1);

@@ -16,12 +16,12 @@ public class KalahGame implements MessageReceiver, TimerListener{
 	private MoveTimer timer;
 	private KalahPlayer player;
 	private int pieRuleChooser, timeLimit;
-	
+
 	private boolean waitingForInfo=true, waitingForReady=true,
 					waitingForOK=true, waitingForYourMove=true,
 					waitingForBegin, processingMove,
 					isServer, myTurn, gameOver, iWon;
-	
+
 	public KalahGame(GUIManager handler, Settings settings){
 		this(handler, settings, null);
 	}
@@ -29,7 +29,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		guiHandler = handler;
 		this.settings = settings;
 		isServer = settings.getBoolean("is-server");
-		
+
 		timer = new MoveTimer();
 
 		handler.closeMenuWindow();
@@ -37,7 +37,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		//We need to get a new connection
 		if(conn == null || conn.isClosed()){
 			if(isServer) handler.openWaitingWindow();
-			
+
 			//New thread because we might have to wait for a connection
 			new Thread(){@Override public void run(){
 				if(isServer) connection = new ServerSide(KalahGame.this, settings);
@@ -52,9 +52,9 @@ public class KalahGame implements MessageReceiver, TimerListener{
 						connection = new ClientSide(KalahGame.this, settings);
 					}
 				}
-				
+
 				handler.closeWaitingWindow();
-				
+
 				if(connection.isClosed()){
 					handler.connectionErrorWindow();
 					handler.openMenuWindow();
@@ -70,7 +70,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			playGame();
 		}
 	}
-	
+
 	private void playGame(){
 		if(isServer){//set up game, send INFO
 			int houses = settings.getInt("holes-per-side");
@@ -78,20 +78,20 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			timeLimit = settings.getInt("time-limit");
 			String first = settings.getString("starting-player");
 			String type = settings.getString("game-type");
-			
+
 			myTurn = !first.equals("F");
 
 			//print INFO
 			connection.println("WELCOME");
 			StringBuilder builder = new StringBuilder("INFO ");
-			
+
 			if(type.equals("C")){
 				houses = settings.getString("custom-board").split(" ").length;
 			}
 			board = new Board(houses, seeds);
 			builder.append(houses).append(' ').append(seeds).append(' ')
 				   .append(timeLimit).append(' ').append(first).append(' ').append(type.equals("C") ? "R" : type);
-			
+
 			if(type.equals("R")){
 				board.randomizeSeeds();
 				for(int i=0; i<board.numHouses; ++i){
@@ -132,7 +132,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		while(board.gameNotOver() && !gameOver){
 			if(myTurn){
 				StringBuilder message = new StringBuilder("");
-				
+
 				//Time my own move. If I timeout, make myself lose.
 				List<Integer> moves;
 				synchronized(timer){//Don't let someone cancel the timer before I ask for a move
@@ -152,7 +152,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				}
 				timer.cancelTimer();//I have finished my move.
 				if(gameOver) break;//Some error happened (or time limit exceeded)
-				
+
 				//send move to opponent
 				myTurn = false;
 				waitingForOK = true;
@@ -171,15 +171,15 @@ public class KalahGame implements MessageReceiver, TimerListener{
 				myTurn = true;
 			}
 		}
-		
+
 		if(!board.gameNotOver() && settings.getBoolean("count-leftovers")){
 			board.collectLeftoverSeeds();
 			player.updateBoard(board);
 		}
-		
+
 //		System.out.println("Score1/Score2 = "+board.housesAndKalahs[board.kalah1()]+"/"
 //		 									 +board.housesAndKalahs[board.kalah2]);
-		
+
 		//if I am the server, send results (end the game naturally)
 		if(isServer && !gameOver){
 			int score = board.getScoreDifference();
@@ -199,7 +199,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 
 	@Override public void timerEnded(){
 		if(gameOver) return;
-		
+
 		if(myTurn){//I timed out
 			if(isServer) endTheGame(GameResult.LOST);
 			else /* hey, we timed out but the server hasn't noticed... :)*/;
@@ -214,10 +214,10 @@ public class KalahGame implements MessageReceiver, TimerListener{
 //		System.out.print(", time="+time);
 		if(myTurn) player.updateTimer(time);
 	}
-	
+
 	public boolean isGameOver(){return gameOver;}
 	public boolean iWon(){return iWon;}
-	
+
 	void endTheGame(GameResult result){
 		switch(result){
 		case WON:
@@ -245,7 +245,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 		guiHandler.openGameOverWindow(result);
 		gameOver = true;
 	}
-	
+
 	KalahPlayer getPlayer(Board board){
 		//Uses reflection to load an AI class from the AI package
 		try{
@@ -266,7 +266,7 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			return new StrategicAI(board);
 		}
 	}
-	
+
 	//---------- I/O ----------------------------------------------------
 	boolean parseServerMessage(String... args){
 		GameResult result = null;
@@ -368,9 +368,9 @@ public class KalahGame implements MessageReceiver, TimerListener{
 			if(pieRuleChooser == 2){
 				board.pieRule();
 				player.applyOpponentMove(-1);
-				
+
 				connection.println("OK");
-				
+
 			}
 			//They sent 'P' when it was not their turn to do pie rule!
 			else if(isServer) endTheGame(GameResult.ILLEGAL);
