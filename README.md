@@ -1,11 +1,9 @@
-# CSCE-315-Project2 <br />
-Nathaniel Leake
+# CSCE-315-Project2 - Mancala AI <br />
 
-## Executables
-The game application comes with a few different JARs (Mains)
-* KalahGame - The primary user inferface, allows a player to join or create a game or edit settings
-* EndlessServer(NonGUI) - A server that continually accepts connections and plays against them using an AI
-* MultiClientEndlessServer - Same as EndlessServer except can handle playing up to 100+ games simultaneously
+## Executables (jars)
+* KalahGame - Primary user inferface, allows a player to join or host a game and configure rules/settings
+* EndlessServer(NoGUI) - Server that accepts incoming connections and plays against them using an AI
+* MultiClientEndlessServer - Same as EndlessServer, except can be scaled to play 100s of incoming games simultaneously
 
 ## Configuration
 ### General Settings
